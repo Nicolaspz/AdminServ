@@ -1,0 +1,48 @@
+.containerCenter{
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  background:#8c8cf1;
+}
+.menu{
+  background: #101026
+}
+.logo{
+  width: 250px;
+  height: auto;
+}
+.login{
+  margin-top: 2rem;
+  width: 600px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  padding: 2rem 1.5rem;
+
+  form{
+    width: 90%;
+    display: flex;
+    flex-direction: column;
+  }
+  form bottom{
+    height: 40px;
+    font-size: 1.2rem;
+  }
+  h1{
+    color: #fff;
+    padding-bottom: 1rem;
+  }
+}
+.text{
+  margin-top: 1rem;
+  color: #fff;
+  cursor: pointer;
+}
+@media (max-width: 620px){
+  .login{
+    width: 90%; 
+  }
+}

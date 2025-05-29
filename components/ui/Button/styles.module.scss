@@ -1,0 +1,42 @@
+.button{
+max-width: 600px;
+background: #ff3f4b;
+border: 0;
+padding: 0.4rem;
+color: #fff;
+border-radius: 0.5rem;
+transition: filter 0.2s;
+&[disabled]{
+  cursor: not-allowed;
+  svg{
+    animation: animate 2s infinite;
+  }
+}
+&:hover{
+  filter: brightness(1.3);
+}
+}
+.buttonText{
+  color:#fff;
+}
+@keyframes animate{
+  from{
+    transform: rotate(0deg);
+  }
+  to{
+    transform: rotate(36deg);
+
+  }
+}
+
+
+// --white:#fff;
+    //--black:#000;
+  
+    //--dark-900:#101026;
+    //--dark-700:#1d1d2e;
+  
+    //--gray-100:#8a8a8a;
+   // --gray-900:#3fffa3;
+    //--red-900:#ff3f4b;--}
+    
