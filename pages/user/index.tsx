@@ -137,7 +137,7 @@ export default function User(){
       <Sidebar>
         <Header />
         
-        <div className="container mx-auto px-4 py-8 max-w-6xl">
+        <div className="container mx-auto px-4 py-8 max-w-6.5xl">
         <ToastContainer position="top-right" autoClose={5000} />
         
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">

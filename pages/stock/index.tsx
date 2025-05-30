@@ -88,9 +88,9 @@ export default function Stock() {
   return (
     <Sidebar>
       <Header />
-      <div className="min-h-screen bg-gray-900 p-5">
+      <div className="container mx-auto px-4 py-8 max-w-6xl">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-white">Estoque de Produtos</h1>
+          <h1 className="text-2xl font-bold text-black">Estoque de Produtos</h1>
           <div className="relative">
             <input
               type="text"
@@ -120,21 +120,20 @@ export default function Stock() {
               <thead className="bg-gray-700">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Nome</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Preço</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Quantidade</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Preço</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Descrição</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Ações</th>
+                 
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-700">
                 {currentItems.map((product) => (
                   <tr key={product.id} className="hover:bg-gray-750">
                     <td className="px-6 py-4 whitespace-nowrap text-white">{product.name}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-white">{product.price}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-green-400">{product.quantity}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-white">
-                      {formatDescription(product.description)}
-                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-white">{product.price}</td>
+                    
+                    
                     <td className="px-6 py-4 whitespace-nowrap">
                       <button
                         onClick={() => toggleDescription(product.id)}
