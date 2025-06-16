@@ -88,7 +88,7 @@ export default function Stock() {
   return (
     <Sidebar>
       <Header />
-      <div className="container mx-auto px-4 py-8 max-w-6xl">
+      <div className="container mx-auto px-4 mr-1.2 py-8 max-w-6xl">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold text-black">Estoque de Produtos</h1>
           <div className="relative">
@@ -106,7 +106,7 @@ export default function Stock() {
         {isLoading ? (
           <div className="flex flex-col items-center justify-center h-screen">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500 mb-4"></div>
-            <p className="text-white text-lg">Carregando estoque...</p>
+            <p className="text-black text-lg">Carregando estoque...</p>
           </div>
         ) : filteredProducts.length === 0 ? (
           <div className="flex items-center justify-center h-screen">
@@ -129,9 +129,23 @@ export default function Stock() {
               <tbody className="divide-y divide-gray-700">
                 {currentItems.map((product) => (
                   <tr key={product.id} className="hover:bg-gray-750">
-                    <td className="px-6 py-4 whitespace-nowrap text-white">{product.name}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-green-400">{product.quantity}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-white">{product.price}</td>
+                    <td className={`px-6 py-4 whitespace-nowrap ${
+                        product.quantity <= 4 ? 'text-red-500' : 'text-green-400'
+                      }`}>
+                      {product.name}
+                    </td>
+                    <td
+                      className={`px-6 py-4 whitespace-nowrap ${
+                        product.quantity <= 4 ? 'text-red-500' : 'text-green-400'
+                      }`}
+                    >
+                      {product.quantity}
+                    </td>
+                    <td className={`px-6 py-4 whitespace-nowrap ${
+                        product.quantity <= 4 ? 'text-red-500' : 'text-green-400'
+                      }`}>
+                      {product.price}
+                    </td>
                     
                     
                     <td className="px-6 py-4 whitespace-nowrap">

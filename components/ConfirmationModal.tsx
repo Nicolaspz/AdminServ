@@ -32,7 +32,7 @@ export function ConfirmationModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-5 backdrop-blur-sm">
-      <div className="bg-white dark:bg-green-600 rounded-lg  p-6 w-full max-w-md animate-fade-in">
+      <div className="bg-blue-600 rounded-lg  p-6 w-full max-w-md animate-fade-in">
         <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
           {title}
         </h3>

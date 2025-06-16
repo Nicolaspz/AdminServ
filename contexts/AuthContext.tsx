@@ -19,11 +19,16 @@ type UserProps = {
   id?: string;
   name?: string;
   email?: string;
-  token: string;
+  token?: string; // Tornado opcional
   role?: string;
   telefone?: string;
   organizationId?: string;
   user_name?: string;
+  address?: string | null;
+  imageLogo?: string | null;
+  nif?: string | null;
+  activeLicense?: string | boolean | null;
+  name_org?: string;
 }
 
 type SignInProps = {
@@ -38,7 +43,12 @@ type SignUpProps = {
   role: string;
   telefone: string;
   organizationId: string;
-  user_name: string;  
+  user_name: string;
+  address?: string,
+	imageLogo: string,
+	nif: string,
+	activeLicense: string,
+	name_org: string
 }
 
 type AuthProviderProps = {
@@ -53,22 +63,13 @@ export function signOut(){
     destroyCookie(undefined, '@sujeitopizza.token')
     Router.push('/')
   }catch{
-    console.log('erro ao deslogar')
+   // console.log('erro ao deslogar')
   }
 }
 
 export function AuthProvider({ children }: AuthProviderProps){
-  const [user, setUser] = useState<UserProps>({
-    id: '',
-    name: '',
-    email: '',
-    token: '',
-    role: '',
-    telefone: '',
-    user_name: '',
-    organizationId:'',
-  });
-  const isAuthenticated = !!user;
+  const [user, setUser] = useState<UserProps | null>(null);
+  const isAuthenticated = !!user?.token;
   const inactivityTimeout = 15 * 60 * 1000; 
   let inactivityTimer: NodeJS.Timeout;
 
@@ -87,24 +88,36 @@ export function AuthProvider({ children }: AuthProviderProps){
     const checkToken = async () => {
       try {
         const { '@sujeitopizza.token': token } = parseCookies();
-
+    
         if (token) {
           const response = await api.get('/me');
-          const { id,name,email,role,user_name} = response.data;
-         
-          console.log("me", response.data);
+          const { id, name, email, role, organizationId, user_name } = response.data;
+          const orgData = response.data.Organization || {};
+          
           setUser({
-            id,email,name,role,user_name,token
+            id,
+            name,
+            email,
+            role,
+            user_name,
+            token, // Garanta que o token está sendo setado
+            organizationId,
+            address: orgData.address || null,
+            imageLogo: orgData.imageLogo || null,
+            nif: orgData.nif || null,
+            activeLicense: orgData.activeLicense || null,
+            name_org: orgData.name || ''
           });
-
-          //console.log("Logado");
-           console.log("token->",token);
+    
+          api.defaults.headers['Authorization'] = `Bearer ${token}`;
+          console.log("usuario", user)
         }
       } catch (error) {
-        console.log("Erro ao verificar o token", error);
+        console.error("Erro ao verificar token:", error);
         signOut();
       }
     };
+    
 
     checkToken(); // Verifica o token ao carregar o componente
 
@@ -135,11 +148,14 @@ export function AuthProvider({ children }: AuthProviderProps){
         password
       })
       
-      console.log("aqui",response)
+      //console.log("logado",response)
       toast.success("Logado com sucesso!");
-      console.log("Response-> ",response.data)
-      const {id,name,email,user_name,token,role,organizationId} = response.data;
-      console.log("aqui", {token});
+      //console.log("Response-> ",response.data)
+      const { id, name, email, user_name, token, role, organizationId } = response.data;
+      const { address,imageLogo,nif,activeLicense} = response.data.Organization;
+          
+          const dados = response.data.Organization;
+      //console.log("aqui", {token});
       setCookie(undefined, '@sujeitopizza.token', token, {
         maxAge: 60 * 60 * 24 * 30, // Expirar em 1 mes
         path: "/" // Quais caminhos terao acesso ao cookie
@@ -151,14 +167,17 @@ export function AuthProvider({ children }: AuthProviderProps){
         role,
         token,
         user_name,
-        organizationId,
-        email
+        organizationId, address,
+        imageLogo,
+        nif,
+        activeLicense,
+        name_org:dados.name,
       })
-      console.log("aqui", user);
+      //console.log("usuario logado", user);
       //Passar para proximas requisiçoes o nosso token
       api.defaults.headers['Authorization'] = `Bearer ${token}`
       
-        Router.push('/produt');
+        Router.push('/dashboard');
      
     }catch(err){
       toast.error("Erro ao Logar")

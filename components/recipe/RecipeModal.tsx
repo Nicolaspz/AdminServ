@@ -1,0 +1,350 @@
+// components/RecipeModal.tsx
+import React, { useState, useEffect } from "react";
+import { FaEdit, FaPlus, FaTrash, FaSave, FaTimes } from 'react-icons/fa';
+import { toast } from 'react-toastify';
+
+type RecipeItem = {
+  id: string;
+  name: string;
+  quantity: number;
+  unit: string;
+  productId: string;
+  ingredient: {
+    name: string;
+    id: string;
+    unit: string;
+  };
+};
+
+type Product = {
+  id: string;
+  name: string;
+  isIgredient: boolean;
+};
+
+type RecipeModalProps = {
+  isOpen: boolean;
+  onClose: () => void;
+  product: Product | null;
+  apiClient: any;
+  user: any;
+  fetchProducts: () => void;
+  allProducts: Product[];
+};
+
+const RecipeModal: React.FC<RecipeModalProps> = ({
+  isOpen,
+  onClose,
+  product,
+  apiClient,
+  user,
+  fetchProducts,
+  allProducts
+}) => {
+  const [recipeItems, setRecipeItems] = useState<RecipeItem[]>([]);
+  const [isEditing, setIsEditing] = useState(false);
+  const [showAddIngredient, setShowAddIngredient] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<string>('');
+  const [quantity, setQuantity] = useState<number>(1);
+  const [unit, setUnit] = useState<string>('un');
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (isOpen && product) {
+      fetchRecipeItems();
+    }
+  }, [isOpen, product]);
+
+  const fetchRecipeItems = async () => {
+    if (!product) return;
+    
+    try {
+      setIsLoading(true);
+      const response = await apiClient.get(`/recipe/${product.id}`, {
+        headers: { Authorization: `Bearer ${user.token}` }
+      });
+      setRecipeItems(response.data);
+      
+    } catch (error) {
+      console.error("Error fetching recipe items:", error);
+      toast.error("Erro ao carregar ingredientes");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleAddIngredient = async () => {
+    
+    if (!selectedProduct || !product) return;
+    
+    try {
+      const response = await apiClient.post("/recipe",{
+        productId: product.id,
+        ingredientId: selectedProduct,
+        quantity: quantity
+      }, {
+        headers: {
+          Authorization: `Bearer ${user.token}`
+        }
+      });
+      
+      fetchRecipeItems();
+      setShowAddIngredient(false);
+      setSelectedProduct('');
+      setQuantity(1);
+      toast.success("Ingrediente adicionado com sucesso!");
+    } catch (error) {
+      console.error("Error adding ingredient:", error.message);
+      toast.warning(error.response?.data?.error);
+    }
+  };
+
+  const handleUpdateIngredient = async (item: RecipeItem) => {
+    
+    try {
+      await apiClient.put(`/recipe`, {
+        productId: item.productId,
+        ingredientId: item.ingredient.id,
+        quantity: item.quantity,
+      }, {
+        headers: { 
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${user.token}` 
+        }
+      });
+      
+      toast.success("Ingrediente atualizado com sucesso!");
+      setIsEditing(false);
+    } catch (error) {
+      console.error("Error updating ingredient:", error);
+      toast.error("Erro ao atualizar ingrediente");
+    }
+  };
+
+  const handleDeleteIngredient = async (id: string) => {
+    try {
+      await apiClient.delete(`/recipe/${id}`, {
+        headers: { Authorization: `Bearer ${user.token}` }
+      });
+      
+      setRecipeItems(recipeItems.filter(item => item.id !== id));
+      toast.success("Ingrediente removido com sucesso!");
+    } catch (error) {
+      console.error("Error deleting ingredient:", error);
+      toast.error("Erro ao remover ingrediente");
+    }
+  };
+
+  if (!isOpen || !product) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-gray-800 rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+        <div className="flex justify-between items-center border-b border-gray-700 px-6 py-4 sticky top-0 bg-gray-800 z-10">
+          <h3 className="text-xl font-semibold text-white">
+            Receita: {product.name}
+          </h3>
+          <button 
+            onClick={onClose}
+            className="text-gray-400 hover:text-white"
+          >
+            <FaTimes />
+          </button>
+        </div>
+        
+        <div className="p-6">
+          {isLoading ? (
+            <div className="flex justify-center items-center h-32">
+              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-green-500"></div>
+            </div>
+          ) : (
+            <>
+              <div className="mb-6">
+                {recipeItems.length > 0 ? (
+                  <div className="bg-gray-800 rounded-lg overflow-hidden">
+                    <div className="bg-gray-700 px-4 py-3 border-b border-gray-600 flex justify-between items-center">
+                      <h4 className="font-semibold text-white">Ingredientes</h4>
+                      {!isEditing && (
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => setIsEditing(true)}
+                            className="text-yellow-400 hover:text-yellow-300 text-sm flex items-center gap-1"
+                          >
+                            <FaEdit /> Editar
+                          </button>
+                          <button
+                            onClick={() => setShowAddIngredient(true)}
+                            className="text-green-400 hover:text-green-300 text-sm flex items-center gap-1"
+                          >
+                            <FaPlus /> Adicionar
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                    
+                    <table className="w-full">
+                      <thead>
+                        <tr className="text-gray-400 text-left border-b border-gray-700">
+                          <th className="px-4 py-2">Nome</th>
+                          <th className="px-4 py-2 text-right">Quantidade</th>
+                          {isEditing && <th className="px-4 py-2 text-right">Ações</th>}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {recipeItems.map((item) => (
+                          <tr key={item.id} className="border-b border-gray-700 last:border-0">
+                            <td className="px-4 py-3 text-white">{item.ingredient.name}</td>
+                            <td className="px-4 py-3 text-right">
+                              {isEditing ? (
+                                <div className="flex items-center justify-end gap-2">
+                                  <input
+                                    type="number"
+                                    value={item.quantity}
+                                    onChange={(e) => {
+                                      const updatedItems = recipeItems.map(ri => 
+                                        ri.id === item.id ? {...ri, quantity: Number(e.target.value)} : ri
+                                      );
+                                      setRecipeItems(updatedItems);
+                                    }}
+                                    className="w-20 bg-gray-700 text-white px-2 py-1 rounded"
+                                    min="1"
+                                    step="1"
+                                  />
+                                  <span className="text-white">{item.ingredient.unit}</span>
+                                </div>
+                              ) : (
+                                <span className="text-green-400">
+                                  {item.quantity} {item.ingredient.unit}
+                                </span>
+                              )}
+                            </td>
+                            {isEditing && (
+                              <td className="px-4 py-3 text-right">
+                                <div className="flex justify-end gap-2">
+                                  <button
+                                    onClick={() => handleUpdateIngredient(item)}
+                                    className="text-green-400 hover:text-green-300"
+                                    title="Salvar"
+                                  >
+                                    <FaSave />
+                                  </button>
+                                  <button
+                                    onClick={() => handleDeleteIngredient(item.id)}
+                                    className="text-red-400 hover:text-red-300"
+                                    title="Excluir"
+                                  >
+                                    <FaTrash />
+                                  </button>
+                                </div>
+                              </td>
+                            )}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-8">
+                    <p className="text-gray-400 mb-4">Nenhum ingrediente cadastrado.</p>
+                    <button
+                      onClick={() => setShowAddIngredient(true)}
+                      className="bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded flex items-center gap-2"
+                    >
+                      <FaPlus /> Adicionar Ingrediente
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {showAddIngredient && (
+                <div className="bg-gray-750 p-4 rounded-lg mb-6">
+                  <div className="flex justify-between items-center mb-4">
+                    <h4 className="font-semibold text-white">Adicionar Ingrediente</h4>
+                    <button
+                      onClick={() => setShowAddIngredient(false)}
+                      className="text-gray-400 hover:text-white"
+                    >
+                      <FaTimes />
+                    </button>
+                  </div>
+                  
+                  <div className="space-y-4">
+                  <div className="grid grid-cols-4 gap-4"> {/* Divisão em 4 colunas */}
+                    {/* Produto - ocupa 3 colunas */}
+                    <div className="col-span-3">
+                      <label className="block text-gray-300 mb-2">Produto*</label>
+                      <select
+                        value={selectedProduct}
+                        onChange={(e) => setSelectedProduct(e.target.value)}
+                        className="w-full bg-gray-700 text-white px-4 py-2 rounded"
+                      >
+                        <option value="">Selecione um produto</option>
+                        {allProducts
+                          .filter(p => p.isIgredient)
+                          .map(product => (
+                            <option key={product.id} value={product.id}>
+                              {product.name}
+                            </option>
+                          ))}
+                      </select>
+                    </div>
+
+                    {/* Quantidade - ocupa 1 coluna */}
+                    <div className="col-span-1">
+                      <label className="block text-gray-300 mb-2">Quantidade*</label>
+                      <input
+                        type="number"
+                        value={quantity}
+                        onChange={(e) => setQuantity(Number(e.target.value))}
+                        className="w-full bg-gray-700 text-white px-4 py-2 rounded"
+                        min="1"
+                        step="1"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Botões alinhados à direita */}
+                  <div className="flex justify-end gap-3 mt-4">
+                    <button
+                      onClick={() => setShowAddIngredient(false)}
+                      className="bg-gray-600 hover:bg-gray-500 text-white px-4 py-2 rounded"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      onClick={handleAddIngredient}
+                      className="bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded"
+                      disabled={!selectedProduct}
+                    >
+                      Adicionar
+                    </button>
+                  </div>
+                </div>
+          </div>
+              )}
+
+              <div className="flex justify-end gap-3 mt-6">
+                {isEditing && (
+                  <button
+                    onClick={() => setIsEditing(false)}
+                    className="bg-gray-600 hover:bg-gray-500 text-white px-4 py-2 rounded"
+                  >
+                    Cancelar Edição
+                  </button>
+                )}
+                <button
+                  onClick={onClose}
+                  className="bg-gray-600 hover:bg-gray-500 text-white px-4 py-2 rounded"
+                >
+                  Fechar
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default RecipeModal;
