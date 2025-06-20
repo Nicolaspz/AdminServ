@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { FiSettings, FiCoffee, FiMenu, FiChevronDown, FiChevronRight } from 'react-icons/fi';
+import { FiSettings, FiCoffee, FiMenu, FiChevronDown, FiChevronRight, FiHome, FiBox, FiPackage } from 'react-icons/fi';
 import { RxDashboard, RxPerson } from 'react-icons/rx';
-import { HiOutlineShoppingBag } from 'react-icons/hi';
+import { HiOutlineShoppingBag, HiOutlineClipboardList } from 'react-icons/hi';
 import { useRouter } from 'next/router';
 
 const Sidebar = ({ children }) => {
@@ -11,23 +11,39 @@ const Sidebar = ({ children }) => {
   const [isProdutosOpen, setIsProdutosOpen] = useState(false);
   
   const links = [
-    { href: '/dashboard', label: 'Dashboard', icon: <FiCoffee size={20} /> },
-    
+    { href: '/dashboard', label: 'Dashboard', icon: <FiHome size={20} /> },
+  
     { 
       href: '', 
       label: 'Produtos', 
-      icon: <RxDashboard size={20} />,
+      icon: <FiBox size={20} />,
       submenu: [
-        { href: '/igredient', label: 'Igrediente' },
-        { href: '/produt', label: 'produto' }
+        { href: '/igredient', label: 'Ingrediente' },
+        { href: '/produt', label: 'Produto' }
       ]
     },
-    { href: '/stock', label: 'Stock', icon: <FiCoffee size={20} /> },
+  
+    { href: '/stock', label: 'Stock', icon: <FiPackage size={20} /> },
+  
     { href: '/sales', label: 'Compra', icon: <HiOutlineShoppingBag size={20} /> },
-    { href: '/recipe', label: 'Receitas', icon: <HiOutlineShoppingBag size={20} /> },
+  
+    { href: '/recipe', label: 'Receitas', icon: <HiOutlineClipboardList size={20} /> },
+  
     { href: '/user', label: 'Usuários', icon: <RxPerson size={20} /> },
-    { href: '/organization', label: 'Organização', icon: <RxPerson size={20} /> },
+  
+    { href: '/organization', label: 'Definições', icon: <FiSettings size={20} /> },
   ];
+
+  // Efeito para verificar a rota atual e expandir o menu de Produtos se necessário
+  useEffect(() => {
+    const produtosItem = links.find(item => item.label === 'Produtos');
+    if (produtosItem && produtosItem.submenu) {
+      const shouldOpen = produtosItem.submenu.some(subItem => 
+        router.pathname === subItem.href
+      );
+      setIsProdutosOpen(shouldOpen);
+    }
+  }, [router.pathname]);
 
   const toggleProdutosMenu = () => {
     setIsProdutosOpen(!isProdutosOpen);
@@ -70,7 +86,7 @@ const Sidebar = ({ children }) => {
                     {isProdutosOpen ? <FiChevronDown /> : <FiChevronRight />}
                   </div>
                   
-                  {isProdutosOpen && (
+                  {(isProdutosOpen || submenu.some(item => isActive(item.href))) && (
                     <div className="ml-4">
                       {submenu.map((subItem, subIndex) => (
                         <Link key={subIndex} href={subItem.href}>
@@ -143,10 +159,10 @@ const Sidebar = ({ children }) => {
                         })}
                         <span>{label}</span>
                       </div>
-                      {isProdutosOpen ? <FiChevronDown /> : <FiChevronRight />}
+                      {isProdutosOpen || submenu.some(item => isActive(item.href)) ? <FiChevronDown /> : <FiChevronRight />}
                     </div>
                     
-                    {isProdutosOpen && (
+                    {(isProdutosOpen || submenu.some(item => isActive(item.href))) && (
                       <div className="ml-4">
                         {submenu.map((subItem, subIndex) => (
                           <Link key={subIndex} href={subItem.href}>

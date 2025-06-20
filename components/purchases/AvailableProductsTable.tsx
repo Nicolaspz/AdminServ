@@ -13,7 +13,6 @@ interface Product {
   id: string;
   name: string;
   description: string;
-  price: number;
   unit: string;
   isIgredient: boolean;
   isDerived: boolean;
@@ -28,11 +27,12 @@ export default function AvailableProductsTable({
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { user } = useContext(AuthContext);
-  const [formData, setFormData] = useState({
+ const [formData, setFormData] = useState({
     quantity: 1,
-    purchasedPrice: 0,
+    purchasePrice: 0,
     salePrice_unitario: 0,
     productTypeId:1,
+    marginPercentage: 20
   });
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -60,6 +60,13 @@ export default function AvailableProductsTable({
   useEffect(() => {
     fetchProducts();
   }, []);
+  useEffect(() => {
+    const calculatedSalePrice = formData.purchasePrice * (1 + (formData.marginPercentage / 100));
+    setFormData(prev => ({
+      ...prev,
+      salePrice_unitario: parseFloat(calculatedSalePrice.toFixed(2))
+    }));
+  }, [formData.purchasePrice, formData.marginPercentage]);
 
   // Filtra produtos conforme pesquisa
   useEffect(() => {
@@ -83,6 +90,7 @@ export default function AvailableProductsTable({
   const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
 
   const handleAddProduct = async () => {
+    console.log("info save",formData)
     if (!selectedProduct) return;
     
     try {
@@ -103,9 +111,10 @@ export default function AvailableProductsTable({
       setSelectedProduct(null);
       setFormData({
         quantity: 1,
-        purchasedPrice: 0,
+        purchasePrice: 0,
         salePrice_unitario: 0,
-        productTypeId:0,
+        productTypeId: 0,
+        marginPercentage:20,
       });
     } catch (error) {
       toast.error('Erro ao adicionar produto');
@@ -115,11 +124,11 @@ export default function AvailableProductsTable({
 
   const handleRowClick = (product: Product) => {
     setSelectedProduct(product);
-    setFormData(prev => ({
+    /*setFormData(prev => ({
       ...prev,
       purchasedPrice: product.price,
       salePrice_unitario: product.price * 1.2 // 20% de margem por padrão
-    }));
+    }));*/
   };
 
   const handlePageChange = (page: number) => {
@@ -145,7 +154,7 @@ export default function AvailableProductsTable({
           ): '' }
           <div className="relative">
            
-        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none border">
           <svg className="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
           </svg>
@@ -186,7 +195,6 @@ export default function AvailableProductsTable({
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Produto</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Descrição</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Preço</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Unidade</th>
             </tr>
           </thead>
@@ -206,7 +214,7 @@ export default function AvailableProductsTable({
                 >
                   <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">{product.name}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{product.description}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{product.price.toFixed(2)}</td>
+                  
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{product.unit}</td>
                 </tr>
               ))
@@ -256,27 +264,30 @@ export default function AvailableProductsTable({
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Preço de Compra</label>
+              <label className="block text-sm font-medium mb-1">Preço unitário de Compra</label>
               <input
                 type="number"
                 min="0"
                 step="0.01"
-                value={formData.purchasedPrice}
-                onChange={(e) => setFormData({...formData, purchasedPrice: parseFloat(e.target.value) || 0})}
+                value={formData.purchasePrice}
+                onChange={(e) => setFormData({...formData, purchasePrice: parseFloat(e.target.value) || 0})}
                 className="w-full px-3 py-2 border rounded-md"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Preço de Venda</label>
-              <input
-                type="number"
-                min="0"
-                step="0.01"
-                value={formData.salePrice_unitario}
-                onChange={(e) => setFormData({...formData, salePrice_unitario: parseFloat(e.target.value) || 0})}
-                className="w-full px-3 py-2 border rounded-md"
-              />
-            </div>
+        <label className="block text-sm font-medium mb-1">Preço de Venda (auto)</label>
+        <input
+          type="number"
+          min="0"
+          step="0.01"
+          value={formData.salePrice_unitario}
+          readOnly
+          className="w-full px-3 py-2 border rounded-md bg-gray-100"
+        />
+        <p className="text-xs text-gray-500 mt-1">
+          Calculado: {formData.purchasePrice} + {formData.marginPercentage}% = {formData.salePrice_unitario}
+        </p>
+      </div>
           </div>
           <div className="mt-4 flex justify-end space-x-3">
             <button onClick={() => setSelectedProduct(null)} className="px-4 py-2 border rounded text-gray-700 hover:bg-gray-100">Cancelar</button>

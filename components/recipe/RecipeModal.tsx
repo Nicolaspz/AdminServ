@@ -13,6 +13,10 @@ type RecipeItem = {
     name: string;
     id: string;
     unit: string;
+    price: number; // Adicionado
+    PrecoVenda?: { // Para compatibilidade
+      preco_venda: number;
+    }[];
   };
 };
 
@@ -20,6 +24,9 @@ type Product = {
   id: string;
   name: string;
   isIgredient: boolean;
+  PrecoVenda?: {
+    preco_venda: number;
+  }[];
 };
 
 type RecipeModalProps = {
@@ -49,31 +56,14 @@ const RecipeModal: React.FC<RecipeModalProps> = ({
   const [unit, setUnit] = useState<string>('un');
   const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    if (isOpen && product) {
-      fetchRecipeItems();
-    }
-  }, [isOpen, product]);
-
-  const fetchRecipeItems = async () => {
-    if (!product) return;
-    
-    try {
-      setIsLoading(true);
-      const response = await apiClient.get(`/recipe/${product.id}`, {
-        headers: { Authorization: `Bearer ${user.token}` }
-      });
-      setRecipeItems(response.data);
-      
-    } catch (error) {
-      console.error("Error fetching recipe items:", error);
-      toast.error("Erro ao carregar ingredientes");
-    } finally {
-      setIsLoading(false);
-    }
+  // Calcular o total da receita
+  const calculateTotal = () => {
+    return recipeItems.reduce((total, item) => {
+      const price = item.ingredient.price || 0;
+      return total + (price * item.quantity);
+    }, 0);
   };
-
-  const handleAddIngredient = async () => {
+const handleAddIngredient = async () => {
     
     if (!selectedProduct || !product) return;
     
@@ -98,42 +88,80 @@ const RecipeModal: React.FC<RecipeModalProps> = ({
       toast.warning(error.response?.data?.error);
     }
   };
+  useEffect(() => {
+    if (isOpen && product) {
+      fetchRecipeItems();
+    }
+  }, [isOpen, product]);
 
-  const handleUpdateIngredient = async (item: RecipeItem) => {
+  const fetchRecipeItems = async () => {
+    if (!product) return;
     
     try {
-      await apiClient.put(`/recipe`, {
-        productId: item.productId,
-        ingredientId: item.ingredient.id,
-        quantity: item.quantity,
-      }, {
-        headers: { 
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${user.token}` 
-        }
-      });
-      
-      toast.success("Ingrediente atualizado com sucesso!");
-      setIsEditing(false);
-    } catch (error) {
-      console.error("Error updating ingredient:", error);
-      toast.error("Erro ao atualizar ingrediente");
-    }
-  };
-
-  const handleDeleteIngredient = async (id: string) => {
-    try {
-      await apiClient.delete(`/recipe/${id}`, {
+      setIsLoading(true);
+      const response = await apiClient.get(`/recipe/${product.id}`, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       
-      setRecipeItems(recipeItems.filter(item => item.id !== id));
-      toast.success("Ingrediente removido com sucesso!");
+      // Processar para incluir preços
+      const itemsWithPrices = response.data.map((item: any) => ({
+        ...item,
+        ingredient: {
+          ...item.ingredient,
+          price: item.ingredient.PrecoVenda?.[0]?.preco_venda || 0
+        }
+      }));
+      console.log("recipient", response.data)
+      console.log("recipientPrices",itemsWithPrices)
+      setRecipeItems(itemsWithPrices);
+      
     } catch (error) {
-      console.error("Error deleting ingredient:", error);
-      toast.error("Erro ao remover ingrediente");
+      console.error("Error fetching recipe items:", error);
+      toast.error("Erro ao carregar ingredientes");
+    } finally {
+      setIsLoading(false);
     }
   };
+  
+   
+  
+    const handleUpdateIngredient = async (item: RecipeItem) => {
+      
+      try {
+        await apiClient.put(`/recipe`, {
+          productId: item.productId,
+          ingredientId: item.ingredient.id,
+          quantity: item.quantity,
+        }, {
+          headers: { 
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${user.token}` 
+          }
+        });
+        
+        toast.success("Ingrediente atualizado com sucesso!");
+        setIsEditing(false);
+      } catch (error) {
+        console.error("Error updating ingredient:", error);
+        toast.error("Erro ao atualizar ingrediente");
+      }
+    };
+  
+    const handleDeleteIngredient = async (id: string) => {
+      try {
+        await apiClient.delete(`/recipe/${id}`, {
+          headers: { Authorization: `Bearer ${user.token}` }
+        });
+        
+        setRecipeItems(recipeItems.filter(item => item.id !== id));
+        toast.success("Ingrediente removido com sucesso!");
+      } catch (error) {
+        console.error("Error deleting ingredient:", error);
+        toast.error("Erro ao remover ingrediente");
+      }
+    };
+
+  // ... (manter todas as outras funções existentes como handleAddIngredient, handleUpdateIngredient, etc.)
 
   if (!isOpen || !product) return null;
 
@@ -185,8 +213,10 @@ const RecipeModal: React.FC<RecipeModalProps> = ({
                     <table className="w-full">
                       <thead>
                         <tr className="text-gray-400 text-left border-b border-gray-700">
-                          <th className="px-4 py-2">Nome</th>
+                          <th className="px-4 py-2">Ingrediente</th>
+                          <th className="px-4 py-2 text-right">Preço Unitário</th>
                           <th className="px-4 py-2 text-right">Quantidade</th>
+                          <th className="px-4 py-2 text-right">Subtotal</th>
                           {isEditing && <th className="px-4 py-2 text-right">Ações</th>}
                         </tr>
                       </thead>
@@ -194,6 +224,9 @@ const RecipeModal: React.FC<RecipeModalProps> = ({
                         {recipeItems.map((item) => (
                           <tr key={item.id} className="border-b border-gray-700 last:border-0">
                             <td className="px-4 py-3 text-white">{item.ingredient.name}</td>
+                            <td className="px-4 py-3 text-right text-green-400">
+                              {item.ingredient.price.toFixed(2)} Kz
+                            </td>
                             <td className="px-4 py-3 text-right">
                               {isEditing ? (
                                 <div className="flex items-center justify-end gap-2">
@@ -218,6 +251,9 @@ const RecipeModal: React.FC<RecipeModalProps> = ({
                                 </span>
                               )}
                             </td>
+                            <td className="px-4 py-3 text-right text-yellow-400">
+                              {(item.ingredient.price * item.quantity).toFixed(2)} Kz
+                            </td>
                             {isEditing && (
                               <td className="px-4 py-3 text-right">
                                 <div className="flex justify-end gap-2">
@@ -241,6 +277,17 @@ const RecipeModal: React.FC<RecipeModalProps> = ({
                           </tr>
                         ))}
                       </tbody>
+                      <tfoot>
+                        <tr className="bg-gray-750">
+                          <td colSpan={3} className="px-4 py-3 text-right font-semibold text-white">
+                            Total da Receita:
+                          </td>
+                          <td className="px-4 py-3 text-right font-bold text-green-400">
+                            {calculateTotal().toFixed(2)} Kz
+                          </td>
+                          {isEditing && <td></td>}
+                        </tr>
+                      </tfoot>
                     </table>
                   </div>
                 ) : (
@@ -256,89 +303,89 @@ const RecipeModal: React.FC<RecipeModalProps> = ({
                 )}
               </div>
 
-              {showAddIngredient && (
-                <div className="bg-gray-750 p-4 rounded-lg mb-6">
-                  <div className="flex justify-between items-center mb-4">
-                    <h4 className="font-semibold text-white">Adicionar Ingrediente</h4>
-                    <button
-                      onClick={() => setShowAddIngredient(false)}
-                      className="text-gray-400 hover:text-white"
-                    >
-                      <FaTimes />
-                    </button>
-                  </div>
-                  
-                  <div className="space-y-4">
-                  <div className="grid grid-cols-4 gap-4"> {/* Divisão em 4 colunas */}
-                    {/* Produto - ocupa 3 colunas */}
-                    <div className="col-span-3">
-                      <label className="block text-gray-300 mb-2">Produto*</label>
-                      <select
-                        value={selectedProduct}
-                        onChange={(e) => setSelectedProduct(e.target.value)}
-                        className="w-full bg-gray-700 text-white px-4 py-2 rounded"
-                      >
-                        <option value="">Selecione um produto</option>
-                        {allProducts
-                          .filter(p => p.isIgredient)
-                          .map(product => (
-                            <option key={product.id} value={product.id}>
-                              {product.name}
-                            </option>
-                          ))}
-                      </select>
-                    </div>
-
-                    {/* Quantidade - ocupa 1 coluna */}
-                    <div className="col-span-1">
-                      <label className="block text-gray-300 mb-2">Quantidade*</label>
-                      <input
-                        type="number"
-                        value={quantity}
-                        onChange={(e) => setQuantity(Number(e.target.value))}
-                        className="w-full bg-gray-700 text-white px-4 py-2 rounded"
-                        min="1"
-                        step="1"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Botões alinhados à direita */}
-                  <div className="flex justify-end gap-3 mt-4">
-                    <button
-                      onClick={() => setShowAddIngredient(false)}
-                      className="bg-gray-600 hover:bg-gray-500 text-white px-4 py-2 rounded"
-                    >
-                      Cancelar
-                    </button>
-                    <button
-                      onClick={handleAddIngredient}
-                      className="bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded"
-                      disabled={!selectedProduct}
-                    >
-                      Adicionar
-                    </button>
-                  </div>
-                </div>
-          </div>
-              )}
-
-              <div className="flex justify-end gap-3 mt-6">
-                {isEditing && (
-                  <button
-                    onClick={() => setIsEditing(false)}
-                    className="bg-gray-600 hover:bg-gray-500 text-white px-4 py-2 rounded"
-                  >
-                    Cancelar Edição
-                  </button>
-                )}
-                <button
-                  onClick={onClose}
-                  className="bg-gray-600 hover:bg-gray-500 text-white px-4 py-2 rounded"
-                >
-                  Fechar
-                </button>
-              </div>
+             {showAddIngredient && (
+                             <div className="bg-gray-750 p-4 rounded-lg mb-6">
+                               <div className="flex justify-between items-center mb-4">
+                                 <h4 className="font-semibold text-white">Adicionar Ingrediente</h4>
+                                 <button
+                                   onClick={() => setShowAddIngredient(false)}
+                                   className="text-gray-400 hover:text-white"
+                                 >
+                                   <FaTimes />
+                                 </button>
+                               </div>
+                               
+                               <div className="space-y-4">
+                               <div className="grid grid-cols-4 gap-4"> {/* Divisão em 4 colunas */}
+                                 {/* Produto - ocupa 3 colunas */}
+                                 <div className="col-span-3">
+                                   <label className="block text-gray-300 mb-2">Produto*</label>
+                                   <select
+                                     value={selectedProduct}
+                                     onChange={(e) => setSelectedProduct(e.target.value)}
+                                     className="w-full bg-gray-700 text-white px-4 py-2 rounded"
+                                   >
+                                     <option value="">Selecione um produto</option>
+                                     {allProducts
+                                       .filter(p => p.isIgredient)
+                                       .map(product => (
+                                         <option key={product.id} value={product.id}>
+                                           {product.name}
+                                         </option>
+                                       ))}
+                                   </select>
+                                 </div>
+             
+                                 {/* Quantidade - ocupa 1 coluna */}
+                                 <div className="col-span-1">
+                                   <label className="block text-gray-300 mb-2">Quantidade*</label>
+                                   <input
+                                     type="number"
+                                     value={quantity}
+                                     onChange={(e) => setQuantity(Number(e.target.value))}
+                                     className="w-full bg-gray-700 text-white px-4 py-2 rounded"
+                                     min="1"
+                                     step="1"
+                                   />
+                                 </div>
+                               </div>
+             
+                               {/* Botões alinhados à direita */}
+                               <div className="flex justify-end gap-3 mt-4">
+                                 <button
+                                   onClick={() => setShowAddIngredient(false)}
+                                   className="bg-gray-600 hover:bg-gray-500 text-white px-4 py-2 rounded"
+                                 >
+                                   Cancelar
+                                 </button>
+                                 <button
+                                   onClick={handleAddIngredient}
+                                   className="bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded"
+                                   disabled={!selectedProduct}
+                                 >
+                                   Adicionar
+                                 </button>
+                               </div>
+                             </div>
+                       </div>
+                           )}
+             
+                           <div className="flex justify-end gap-3 mt-6">
+                             {isEditing && (
+                               <button
+                                 onClick={() => setIsEditing(false)}
+                                 className="bg-gray-600 hover:bg-gray-500 text-white px-4 py-2 rounded"
+                               >
+                                 Cancelar Edição
+                               </button>
+                             )}
+                             <button
+                               onClick={onClose}
+                               className="bg-gray-600 hover:bg-gray-500 text-white px-4 py-2 rounded"
+                             >
+                               Fechar
+                             </button>
+                           </div>
             </>
           )}
         </div>

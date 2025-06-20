@@ -49,7 +49,7 @@ export default function PurchaseProductsTable({
       setItems(response.data);
     } catch (error) {
       toast.error('Erro ao carregar itens da compra');
-      console.log("carregar",error);
+      
     } finally {
       setIsLoading(false);
     }
@@ -62,8 +62,7 @@ export default function PurchaseProductsTable({
   }, [purchaseId]);
 
   const handleRemoveItem = async (productId: string, purchaseId: string) => {
-    console.log("id prod", productId);
-    console.log("id compra", purchaseId);
+    
     try {
       if (!productId || !purchaseId) {
         throw new Error('IDs inválidos');
@@ -96,7 +95,7 @@ export default function PurchaseProductsTable({
   
 
   return (
-    <div className="overflow-x-auto max-h-96 overflow-y-auto">
+    <div className="overflow-x-auto">
       <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-50">
           <tr>

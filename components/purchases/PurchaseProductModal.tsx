@@ -55,12 +55,14 @@ export default function PurchaseProductModal({
           </div>
           
           {activeTab === 'current' ? (
-            <PurchaseProductsTable
-              purchaseId={purchaseId}
-              onUpdate={handleAddSuccess}
-              key={refreshKey}
-              status={status}
-            />
+            <div className="max-h-[70vh] overflow-y-auto p-4">
+              <PurchaseProductsTable
+                purchaseId={purchaseId}
+                onUpdate={handleAddSuccess}
+                key={refreshKey}
+                status={status}
+              />
+            </div>
           ) : (
             <AvailableProductsTable 
               purchaseId={purchaseId} 

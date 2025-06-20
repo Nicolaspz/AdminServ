@@ -66,8 +66,10 @@ export default function UserManagement() {
 
   const fetchUsers = async () => {
     try {
-      const response = await apiClient.get("/all_users", {
+      const response = await apiClient.get("/users", {
+        params: { organizationId: user?.organizationId },
         headers: { Authorization: `Bearer ${user?.token}` },
+        
       });
       setUsers(response.data);
       setFilteredUsers(response.data);

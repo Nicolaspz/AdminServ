@@ -2,7 +2,8 @@
   "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
-  "/sales": "pages/sales.js",
-  "/organization": "pages/organization.js",
-  "/user": "pages/user.js"
+  "/igredient": "pages/igredient.js",
+  "/": "pages/index.js",
+  "/dashboard": "pages/dashboard.js",
+  "/produt": "pages/produt.js"
 }

@@ -3,7 +3,7 @@ import { setupAPIClient } from '../../services/api';
 import { AuthContext } from '../../contexts/AuthContext';
 import CreateModal from './CreateModal';
 import { FaPlus, FaSearch, FaEdit, FaList, FaCheck } from 'react-icons/fa';
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
 import PurchaseProductModal from './PurchaseProductModal';
 import AddToStockButton from './AddToStockButton';
 
@@ -32,6 +32,7 @@ export default function PurchaseList({ refreshKey }: PurchaseListProps) {
   const [selectedPurchase, setSelectedPurchase] = useState<Purchase | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [activeTab, setActiveTab] = useState<'all' | 'completed' | 'pending'>('all');
   
   const itemsPerPage = 10;
   const apiClient = setupAPIClient();
@@ -43,25 +44,58 @@ export default function PurchaseList({ refreshKey }: PurchaseListProps) {
     supplierId: '1'
   });
 
+  // Contadores para cada tab
+  const counts = {
+    all: purchases.length,
+    completed: purchases.filter(p => p.status).length,
+    pending: purchases.filter(p => !p.status).length
+  };
+
   const fetchPurchases = async () => {
     try {
       const response = await apiClient.get('/compra', {
         params: { organizationId: user?.organizationId },
-        headers: { Authorization: `Bearer ${user.token}` }
+        headers: { Authorization: `Bearer ${user?.token}` }
       });
       
       setPurchases(response.data);
-      setFilteredPurchases(response.data);
+      filterPurchases(response.data, searchTerm, activeTab);
     } catch (error) {
       console.error('Erro ao buscar compras:', error);
+      toast.error('Erro ao carregar compras');
     } finally {
       setIsLoading(false);
     }
   };
 
+  const filterPurchases = (purchases: Purchase[], term: string, tab: typeof activeTab) => {
+    let filtered = purchases;
+    
+    // Aplica filtro por termo de busca
+    if (term.trim() !== '') {
+      filtered = filtered.filter(purchase =>
+        purchase.name.toLowerCase().includes(term.toLowerCase()) ||
+        purchase.description.toLowerCase().includes(term.toLowerCase())
+      );
+    }
+    
+    // Aplica filtro por status
+    if (tab === 'completed') {
+      filtered = filtered.filter(purchase => purchase.status);
+    } else if (tab === 'pending') {
+      filtered = filtered.filter(purchase => !purchase.status);
+    }
+    
+    setFilteredPurchases(filtered);
+    setCurrentPage(1);
+  };
+
   const handleAddPurchase = async () => {
     try {
-      if (!user?.organizationId) return;
+      if (!user?.organizationId) {
+        toast.error('Organização não identificada');
+        return;
+      }
       
       const response = await apiClient.post('/compra', {
         ...formData,
@@ -70,8 +104,8 @@ export default function PurchaseList({ refreshKey }: PurchaseListProps) {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       
-      setPurchases([...purchases, response.data]);
-      setFilteredPurchases([...filteredPurchases, response.data]);
+      setPurchases(prev => [...prev, response.data]);
+      filterPurchases([...purchases, response.data], searchTerm, activeTab);
       setShowAddModal(false);
       setFormData({
         name: '',
@@ -79,9 +113,10 @@ export default function PurchaseList({ refreshKey }: PurchaseListProps) {
         qtdCompra: 0,
         supplierId: '1'
       });
-      
+      toast.success('Compra adicionada com sucesso!');
     } catch (error) {
       console.error('Erro ao adicionar compra:', error);
+      toast.error('Erro ao adicionar compra');
     }
   };
 
@@ -94,18 +129,8 @@ export default function PurchaseList({ refreshKey }: PurchaseListProps) {
   }, [refreshKey, user]);
 
   useEffect(() => {
-    if (searchTerm.trim() === '') {
-      setFilteredPurchases(purchases);
-      setCurrentPage(1);
-    } else {
-      const filtered = purchases.filter(purchase =>
-        purchase.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        purchase.description.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-      setFilteredPurchases(filtered);
-      setCurrentPage(1);
-    }
-  }, [searchTerm, purchases]);
+    filterPurchases(purchases, searchTerm, activeTab);
+  }, [searchTerm, activeTab]);
 
   // Paginação
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -116,9 +141,11 @@ export default function PurchaseList({ refreshKey }: PurchaseListProps) {
   const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
 
   if (isLoading) {
-    return <div className="flex justify-center py-20">
-      <div className="w-8 h-8 border-4 border-green-500 border-t-transparent rounded-full animate-spin"></div>
-    </div>
+    return (
+      <div className="flex justify-center py-20">
+        <div className="w-8 h-8 border-4 border-green-500 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
   }
 
   return (
@@ -129,7 +156,7 @@ export default function PurchaseList({ refreshKey }: PurchaseListProps) {
             <input
               type="text"
               placeholder="Pesquisar compras..."
-              className="pl-10 pr-4 py-2 border rounded-lg"
+              className="pl-10 pr-4 py-2 border rounded-lg w-64"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -145,9 +172,49 @@ export default function PurchaseList({ refreshKey }: PurchaseListProps) {
         </div>
       </div>
       
+      {/* Tabs de filtro por status */}
+      <div className="flex border-b border-gray-200 mb-6">
+        <button
+          onClick={() => setActiveTab('all')}
+          className={`px-4 py-2 font-medium text-sm focus:outline-none flex items-center gap-1 ${
+            activeTab === 'all' 
+              ? 'border-b-2 border-blue-500 text-blue-600' 
+              : 'text-gray-500 hover:text-gray-700'
+          }`}
+        >
+          Todas <span className="text-xs bg-gray-100 px-2 py-1 rounded-full">{counts.all}</span>
+        </button>
+        <button
+          onClick={() => setActiveTab('pending')}
+          className={`px-4 py-2 font-medium text-sm focus:outline-none flex items-center gap-1 ${
+            activeTab === 'pending' 
+              ? 'border-b-2 border-blue-500 text-blue-600' 
+              : 'text-gray-500 hover:text-gray-700'
+          }`}
+        >
+          Pendentes <span className="text-xs bg-gray-100 px-2 py-1 rounded-full">{counts.pending}</span>
+        </button>
+        <button
+          onClick={() => setActiveTab('completed')}
+          className={`px-4 py-2 font-medium text-sm focus:outline-none flex items-center gap-1 ${
+            activeTab === 'completed' 
+              ? 'border-b-2 border-blue-500 text-blue-600' 
+              : 'text-gray-500 hover:text-gray-700'
+          }`}
+        >
+          Concluídas <span className="text-xs bg-gray-100 px-2 py-1 rounded-full">{counts.completed}</span>
+        </button>
+      </div>
+      
       {filteredPurchases.length === 0 ? (
         <div className="bg-gray-100 p-8 rounded-lg text-center">
-          {searchTerm ? "Nenhuma compra encontrada com esse termo" : "Nenhuma compra cadastrada ainda"}
+          {searchTerm 
+            ? "Nenhuma compra encontrada com esse termo" 
+            : activeTab === 'all'
+              ? "Nenhuma compra cadastrada ainda"
+              : activeTab === 'pending'
+                ? "Nenhuma compra pendente"
+                : "Nenhuma compra concluída"}
         </div>
       ) : (
         <>
@@ -183,7 +250,7 @@ export default function PurchaseList({ refreshKey }: PurchaseListProps) {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-500">
-                        {new Date(purchase.created_at).toLocaleDateString()}
+                        {new Date(purchase.created_at).toLocaleDateString('pt-BR')}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -210,8 +277,7 @@ export default function PurchaseList({ refreshKey }: PurchaseListProps) {
                           purchaseId={purchase.id}
                           onSuccess={fetchPurchases}
                           status={purchase.status}
-                          organizationId={user.organizationId}
-                          
+                          organizationId={user?.organizationId || ''}
                         />
                       </div>
                     </td>
@@ -229,7 +295,11 @@ export default function PurchaseList({ refreshKey }: PurchaseListProps) {
                   <button
                     key={number}
                     onClick={() => paginate(number)}
-                    className={`px-3 py-1 rounded-md ${currentPage === number ? 'bg-blue-600 text-white' : 'bg-gray-200 hover:bg-gray-300'}`}
+                    className={`px-3 py-1 rounded-md ${
+                      currentPage === number 
+                        ? 'bg-blue-600 text-white' 
+                        : 'bg-gray-200 hover:bg-gray-300'
+                    }`}
                   >
                     {number}
                   </button>
@@ -280,6 +350,7 @@ export default function PurchaseList({ refreshKey }: PurchaseListProps) {
             <button
               onClick={handleAddPurchase}
               className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+              disabled={!formData.name.trim()}
             >
               Salvar Compra
             </button>
@@ -288,17 +359,16 @@ export default function PurchaseList({ refreshKey }: PurchaseListProps) {
       </CreateModal>
       
       {/* Modal para produtos da compra */}
-      {selectedPurchase && (
+      {showProductModal && selectedPurchase && (
         <PurchaseProductModal
           purchaseId={selectedPurchase.id}
-          onClose={() =>{
-            console.log("Fechando modal...")
-            setShowProductModal(false)}}
+          onClose={() => setShowProductModal(false)}
           onSuccess={fetchPurchases}
           status={selectedPurchase.status}
-          
         />
       )}
+      
+      
     </div>
   );
 }
