@@ -30,7 +30,6 @@ export default function AvailableProductsTable({
  const [formData, setFormData] = useState({
     quantity: 1,
     purchasePrice: 0,
-    salePrice_unitario: 0,
     productTypeId:1,
     marginPercentage: 20
   });
@@ -60,13 +59,13 @@ export default function AvailableProductsTable({
   useEffect(() => {
     fetchProducts();
   }, []);
-  useEffect(() => {
+  /*useEffect(() => {
     const calculatedSalePrice = formData.purchasePrice * (1 + (formData.marginPercentage / 100));
     setFormData(prev => ({
       ...prev,
       salePrice_unitario: parseFloat(calculatedSalePrice.toFixed(2))
     }));
-  }, [formData.purchasePrice, formData.marginPercentage]);
+  }, [formData.purchasePrice, formData.marginPercentage]);*/
 
   // Filtra produtos conforme pesquisa
   useEffect(() => {
@@ -90,7 +89,7 @@ export default function AvailableProductsTable({
   const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
 
   const handleAddProduct = async () => {
-    console.log("info save",formData)
+    
     if (!selectedProduct) return;
     
     try {
@@ -112,7 +111,6 @@ export default function AvailableProductsTable({
       setFormData({
         quantity: 1,
         purchasePrice: 0,
-        salePrice_unitario: 0,
         productTypeId: 0,
         marginPercentage:20,
       });
@@ -276,16 +274,9 @@ export default function AvailableProductsTable({
             </div>
             <div>
         <label className="block text-sm font-medium mb-1">Preço de Venda (auto)</label>
-        <input
-          type="number"
-          min="0"
-          step="0.01"
-          value={formData.salePrice_unitario}
-          readOnly
-          className="w-full px-3 py-2 border rounded-md bg-gray-100"
-        />
+        
         <p className="text-xs text-gray-500 mt-1">
-          Calculado: {formData.purchasePrice} + {formData.marginPercentage}% = {formData.salePrice_unitario}
+          Calculado: {formData.purchasePrice} + {formData.marginPercentage}% = {formData.purchasePrice} + {formData.marginPercentage}%
         </p>
       </div>
           </div>

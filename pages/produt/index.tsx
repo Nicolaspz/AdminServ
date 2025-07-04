@@ -8,13 +8,19 @@ import { API_BASE_URL } from '../../config';
 import { toast, ToastContainer } from 'react-toastify';
 import Modal from "../../components/Modal";
 import RecipeModal from "../../components/recipe/RecipeModal";
+import { FaMoneyBillWave, FaCheck } from 'react-icons/fa';
+import { Tooltip } from 'react-tooltip';
 
 type Category = {
   id: string;
   name: string;
   organizationId: string;
 };
-
+type PrecoVenda = {
+  preco_venda: number;
+  precoSugerido?: number;
+  data_inicio?: string;
+}[];
 type RecipeItem = {
   id: string;
   name: string;
@@ -37,13 +43,13 @@ type Product = {
   is_fractional: boolean;
   isDerived: boolean;
   isIgredient: boolean;
-  PrecoVenda: {
-    preco_venda: number;
-  }[];
+  PrecoVenda: PrecoVenda;
   recipeItems: RecipeItem[];
   categoryId: string;
   organizationId: string;
-  price?: number; // Adicionado para compatibilidade
+  Category?: {
+    name: string;
+  };
 };
 
 const DERIVED_CATEGORY_ID = "5d63b5df-b11b-4eee-a9fc-4fb1b1eb8efa";
@@ -82,7 +88,24 @@ export default function ProductsList() {
     }
     fetchData();
   }, [user]);
-
+  const handleAcceptSuggestedPrice = async (productId: string) => {
+    if (!user) return;
+  
+    try {
+      await apiClient.put(`/price`, {
+        productId
+      }, {
+        headers: {
+          Authorization: `Bearer ${user.token}`
+        }
+      });
+      toast.success('Preço atualizado com sucesso!');
+      fetchData();
+    } catch (error) {
+      console.error("Error updating price:", error);
+      toast.error('Erro ao atualizar preço');
+    }
+  };
   async function fetchData() {
     try {
       const [productsResponse, categoriesResponse] = await Promise.all([
@@ -614,8 +637,31 @@ export default function ProductsList() {
                               </div>
                             )}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {product.PrecoVenda?.[0]?.preco_venda?.toFixed(2) || '0.00'} Kz
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                            <div className="flex items-center gap-2">
+                              <span>
+                                {product.PrecoVenda?.[0]?.preco_venda?.toFixed(2) || '0.00'} Kz
+                              </span>
+                              {product.PrecoVenda?.[0]?.precoSugerido && (
+                                <>
+                                  <span
+                                    className="text-yellow-500 cursor-pointer"
+                                    data-tooltip-id={`suggested-tooltip-${product.id}`}
+                                    data-tooltip-content={`Preço sugerido: ${product.PrecoVenda[0].precoSugerido.toFixed(2)} Kz`}
+                                  >
+                                    <FaMoneyBillWave />
+                                  </span>
+                                  <Tooltip id={`suggested-tooltip-${product.id}`} />
+                                  <button
+                                    onClick={() => handleAcceptSuggestedPrice(product.id)}
+                                    className="text-green-500 hover:text-green-700 ml-1"
+                                    title="Aceitar preço sugerido"
+                                  >
+                                    <FaCheck size={14} />
+                                  </button>
+                                </>
+                              )}
+                            </div>
                           </td>
                           
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">

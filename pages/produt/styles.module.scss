@@ -4,7 +4,14 @@
     min-height: 100vh;
     color: white;
 }
-
+.react-tooltip {
+    z-index: 1000;
+    background-color: #4c60f6;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+  }
 .order_container {
     background-color: #2e2e3e;
     padding: 15px;

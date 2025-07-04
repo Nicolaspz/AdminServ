@@ -5,7 +5,7 @@ import { AuthContext } from '../../contexts/AuthContext';
 
 interface PurchaseItem {
   id: string;
-  salePrice_unitario: number;
+  purchasePrice: number;
   quantity: number;
   productId: string;
   purchaseId: string;
@@ -122,7 +122,7 @@ export default function PurchaseProductsTable({
                   <div className="font-medium text-gray-900">{item.product.name}</div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  {item.salePrice_unitario.toLocaleString('pt-AO', {
+                  {item.purchasePrice.toLocaleString('pt-AO', {
                     style: 'currency',
                     currency: 'AOA'
                   })}
@@ -131,7 +131,7 @@ export default function PurchaseProductsTable({
                   {item.quantity}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  {(item.salePrice_unitario * item.quantity).toLocaleString('pt-AO', {
+                  {(item.purchasePrice * item.quantity).toLocaleString('pt-AO', {
                     style: 'currency',
                     currency: 'AOA'
                   })}

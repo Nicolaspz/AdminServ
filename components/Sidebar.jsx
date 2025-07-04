@@ -32,6 +32,8 @@ const Sidebar = ({ children }) => {
     { href: '/user', label: 'Usuários', icon: <RxPerson size={20} /> },
   
     { href: '/organization', label: 'Definições', icon: <FiSettings size={20} /> },
+    { href: '/cardapio', label: 'Cardápio', icon: <FiSettings size={20} /> },
+    { href: '/pedidos', label: 'Pedidos', icon: <FiSettings size={20} /> },
   ];
 
   // Efeito para verificar a rota atual e expandir o menu de Produtos se necessário

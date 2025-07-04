@@ -198,7 +198,7 @@ export function AuthProvider({ children }: AuthProviderProps){
 
       toast.success("Cadastrado com sucesso!")
 
-      Router.push('/')
+      Router.push('/cardapio')
 
     }catch(err){
       toast.error("Erro ao se Cadastrar")
