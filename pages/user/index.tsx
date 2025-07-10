@@ -3,7 +3,7 @@ import Head from "next/head";
 import styles from './styles.module.scss';
 import { FormEvent, useState, useContext, useEffect } from 'react';
 import { toast, ToastContainer } from "react-toastify";
-import { canSSRAuth } from "../../utils/canSSRAuth";
+
 import Sidebar from "../../components/Sidebar";
 import { AuthContext } from '../../contexts/AuthContext';
 import { setupAPIClient } from "../../services/api";
@@ -181,7 +181,7 @@ export default function UserManagement() {
   return (
     <>
       <Head>
-        <title>Gerenciamento de Usuários - RDB Transportes</title>
+        <title>Gerenciamento de Usuários - Serve Fixe</title>
       </Head>
       
       <Sidebar>
@@ -433,8 +433,3 @@ export default function UserManagement() {
   )
 }
 
-export const getServerSideProps = canSSRAuth(async (ctx) => {
-  return {
-    props: {}
-  }
-});

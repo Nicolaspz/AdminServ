@@ -1,4 +1,4 @@
-import { GetServerSideProps, GetServerSidePropsContext, GetServerSidePropsResult } from "next";
+/*import { GetServerSideProps, GetServerSidePropsContext, GetServerSidePropsResult } from "next";
 import { parseCookies } from "nookies";
 
 //funcção paginas q so podem ser visitadas por visitantes
@@ -17,4 +17,4 @@ const cookies= parseCookies(ctx);
     return await fn(ctx)
 
   }
-}
+}*/

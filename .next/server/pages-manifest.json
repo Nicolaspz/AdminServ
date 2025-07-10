@@ -2,5 +2,9 @@
   "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
-  "/produt": "pages/produt.js"
+  "/stock": "pages/stock.js",
+  "/dashboard": "pages/dashboard.js",
+  "/sign-in": "pages/sign-in.js",
+  "/sales": "pages/sales.js",
+  "/user": "pages/user.js"
 }
