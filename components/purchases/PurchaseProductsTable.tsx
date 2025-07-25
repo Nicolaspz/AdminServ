@@ -34,6 +34,7 @@ export default function PurchaseProductsTable({
   const [isLoading, setIsLoading] = useState(true);
   const apiClient = setupAPIClient();
   const { user } = useContext(AuthContext);
+
   const fetchItems = async () => {
     try {
       setIsLoading(true);
@@ -49,7 +50,6 @@ export default function PurchaseProductsTable({
       setItems(response.data);
     } catch (error) {
       toast.error('Erro ao carregar itens da compra');
-      
     } finally {
       setIsLoading(false);
     }
@@ -62,14 +62,12 @@ export default function PurchaseProductsTable({
   }, [purchaseId]);
 
   const handleRemoveItem = async (productId: string, purchaseId: string) => {
-    
     try {
       if (!productId || !purchaseId) {
         throw new Error('IDs inválidos');
       }
   
       const response = await apiClient.delete('/remuvProdcompra', {
-        
         params: {
           productId: productId.trim(),
           purchaseId: purchaseId.trim()
@@ -92,45 +90,44 @@ export default function PurchaseProductsTable({
       toast.error(error.response?.data?.error || 'Erro ao remover item');
     }
   };
-  
 
   return (
     <div className="overflow-x-auto">
-      <table className="min-w-full divide-y divide-gray-200">
-        <thead className="bg-gray-50">
+      <table className="min-w-full divide-y divide-slate-700">
+        <thead className="bg-slate-700">
           <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Produto</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Preço Unitário</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Quantidade</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ações</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Produto</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Preço Unitário</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Quantidade</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Total</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Ações</th>
           </tr>
         </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
+        <tbody className="bg-slate-800 divide-y divide-slate-700">
           {isLoading ? (
             <tr>
-              <td colSpan={5} className="px-6 py-4 text-center">Carregando itens...</td>
+              <td colSpan={5} className="px-6 py-4 text-center text-slate-300">Carregando itens...</td>
             </tr>
           ) : items.length === 0 ? (
             <tr>
-              <td colSpan={5} className="px-6 py-4 text-center">Nenhum item adicionado à compra</td>
+              <td colSpan={5} className="px-6 py-4 text-center text-slate-300">Nenhum item adicionado à compra</td>
             </tr>
           ) : (
             items.map((item) => (
-              <tr key={item.id}>
+              <tr key={item.id} className="hover:bg-slate-700/50">
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="font-medium text-gray-900">{item.product.name}</div>
+                  <div className="font-medium text-slate-200">{item.product.name}</div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-6 py-4 whitespace-nowrap text-slate-300">
                   {item.purchasePrice.toLocaleString('pt-AO', {
                     style: 'currency',
                     currency: 'AOA'
                   })}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-6 py-4 whitespace-nowrap text-slate-300">
                   {item.quantity}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-6 py-4 whitespace-nowrap text-slate-300">
                   {(item.purchasePrice * item.quantity).toLocaleString('pt-AO', {
                     style: 'currency',
                     currency: 'AOA'
@@ -138,17 +135,17 @@ export default function PurchaseProductsTable({
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <button
-                        onClick={() => {
-                          const confirmDelete = window.confirm('Tem certeza que deseja remover este item?');
-                          if (confirmDelete) {
-                            handleRemoveItem(item.product.id, item.purchaseId);
-                          }
-                        }}
-                    className="text-red-600 hover:text-red-900"
+                    onClick={() => {
+                      const confirmDelete = window.confirm('Tem certeza que deseja remover este item?');
+                      if (confirmDelete) {
+                        handleRemoveItem(item.product.id, item.purchaseId);
+                      }
+                    }}
+                    className={`text-red-400 hover:text-red-300 ${status ? 'opacity-50 cursor-not-allowed' : ''}`}
                     disabled={status}
-                      >
-                        Remover
-                    </button>
+                  >
+                    Remover
+                  </button>
                 </td>
               </tr>
             ))

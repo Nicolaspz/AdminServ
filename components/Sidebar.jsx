@@ -11,33 +11,26 @@ const Sidebar = ({ children }) => {
   const [isProdutosOpen, setIsProdutosOpen] = useState(false);
   
   const links = [
-    { href: '/dashboard', label: 'Dashboard', icon: <FiHome size={20} /> },
-  
+    { href: '/dashboard', label: 'Dashboard', icon: <FiHome size={18} /> },
     { 
       href: '', 
       label: 'Produtos', 
-      icon: <FiBox size={20} />,
+      icon: <FiBox size={18} />,
       submenu: [
-        { href: '/igredient', label: 'Ingrediente' },
-        { href: '/produt', label: 'Produto' }
+        { href: '/dashboard/igredient', label: 'Ingrediente' },
+        { href: '/dashboard/produt', label: 'Produto' }
       ]
     },
-  
-    { href: '/stock', label: 'Stock', icon: <FiPackage size={20} /> },
-  
-    { href: '/sales', label: 'Compra', icon: <HiOutlineShoppingBag size={20} /> },
-  
-    { href: '/recipe', label: 'Receitas', icon: <HiOutlineClipboardList size={20} /> },
-  
-    { href: '/user', label: 'Usuários', icon: <RxPerson size={20} /> },
-  
-    { href: '/organization', label: 'Definições', icon: <FiSettings size={20} /> },
-    { href: '/cardapio', label: 'Cardápio', icon: <FiSettings size={20} /> },
-    { href: '/pedidos', label: 'Pedidos', icon: <FiSettings size={20} /> }, 
-    { href: '/comida_pedido', label: 'Pedidos Comida', icon: <FiSettings size={20} /> }
+    { href: '/dashboard/stock', label: 'Stock', icon: <FiPackage size={18} /> },
+    { href: '/dashboard/sales', label: 'Compra', icon: <HiOutlineShoppingBag size={18} /> },
+    { href: '/dashboard/recipe', label: 'Receitas', icon: <HiOutlineClipboardList size={18} /> },
+    { href: '/dashboard/user', label: 'Usuários', icon: <RxPerson size={18} /> },
+    { href: '/dashboard/organization', label: 'Definições', icon: <FiSettings size={18} /> },
+    { href: 'dashboard/cardapio', label: 'Cardápio', icon: <FiSettings size={18} /> },
+    { href: '/dashboard/pedidos', label: 'Pedidos', icon: <FiSettings size={18} /> }, 
+    { href: 'dashboard/comida_pedido', label: 'Pedidos Comida', icon: <FiSettings size={18} /> }
   ];
 
-  // Efeito para verificar a rota atual e expandir o menu de Produtos se necessário
   useEffect(() => {
     const produtosItem = links.find(item => item.label === 'Produtos');
     if (produtosItem && produtosItem.submenu) {
@@ -58,47 +51,49 @@ const Sidebar = ({ children }) => {
     <div className='flex'>
       {/* Mobile Hamburger Button */}
       <button
-        className='md:hidden fixed top-4 left-4 z-50 p-2 rounded-lg bg-purple-800 text-white'
+        className='md:hidden fixed top-4 left-4 z-50 p-2 rounded-lg bg-slate-700 text-white shadow-md hover:bg-slate-600 transition-colors'
         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
       >
-        <FiMenu size={24} />
+        <FiMenu size={20} />
       </button>
 
       {/* Desktop Sidebar */}
-      <div className='hidden md:block fixed w-30 h-screen p-4 bg-white border-r-[1px] flex flex-col justify-between'>
-        <div className='flex flex-col items-center'>
+      <div className='hidden md:flex fixed w-52 h-screen p-3 bg-slate-800 border-r border-slate-700 flex-col justify-between'>
+        <div className='flex flex-col items-start space-y-1 mt-4'>
           {links.map(({ href, label, icon, submenu }, index) => (
             <div key={index} className="w-full">
               {submenu ? (
                 <>
                   <div
-                    style={{ width: '140px' }}
-                    className={`flex justify-between items-center rounded-lg my-1 p-3 cursor-pointer ${
+                    className={`flex justify-between items-center rounded-md my-1 p-2 pl-3 w-full cursor-pointer transition-colors ${
                       isActive(href) || submenu.some(item => isActive(item.href)) 
-                        ? 'bg-purple-800 text-white' 
-                        : 'bg-gray-100 hover:bg-gray-200'
+                        ? 'bg-slate-600 text-white' 
+                        : 'text-slate-200 hover:bg-slate-700 hover:text-white'
                     }`}
                     onClick={toggleProdutosMenu}
                   >
-                    <div className="flex items-center">
+                    <div className="flex items-center space-x-2">
                       {React.cloneElement(icon, {
-                        className: `mr-1 ${isActive(href) || submenu.some(item => isActive(item.href)) ? 'text-white' : 'text-purple-800'}`,
+                        className: `flex-shrink-0 ${(isActive(href) || submenu.some(item => isActive(item.href))) ? 'text-white' : 'text-slate-300'}`,
                       })}
-                      <span>{label}</span>
+                      <span className="text-sm font-medium">{label}</span>
                     </div>
-                    {isProdutosOpen ? <FiChevronDown /> : <FiChevronRight />}
+                    {isProdutosOpen ? (
+                      <FiChevronDown className="text-slate-400" size={16} />
+                    ) : (
+                      <FiChevronRight className="text-slate-400" size={16} />
+                    )}
                   </div>
                   
                   {(isProdutosOpen || submenu.some(item => isActive(item.href))) && (
-                    <div className="ml-4">
+                    <div className="ml-6">
                       {submenu.map((subItem, subIndex) => (
                         <Link key={subIndex} href={subItem.href}>
                           <div
-                            style={{ width: '120px' }}
-                            className={`flex items-center rounded-lg my-1 p-2 pl-4 ${
+                            className={`flex items-center rounded-md my-1 p-2 pl-3 w-full text-sm transition-colors ${
                               isActive(subItem.href) 
-                                ? 'bg-purple-600 text-white' 
-                                : 'bg-gray-50 hover:bg-gray-100 cursor-pointer'
+                                ? 'bg-slate-600 text-white' 
+                                : 'text-slate-300 hover:bg-slate-700 hover:text-white cursor-pointer'
                             }`}
                           >
                             <span>{subItem.label}</span>
@@ -109,17 +104,20 @@ const Sidebar = ({ children }) => {
                   )}
                 </>
               ) : (
-                <Link href={href}>
+                <Link href={href} className="w-full">
                   <div
-                    style={{ width: '140px' }}
-                    className={`flex justify-center items-center rounded-lg my-4 p-3 inline-block ${
-                      isActive(href) ? 'bg-purple-800 text-white' : 'bg-gray-100 hover:bg-gray-200 cursor-pointer'
+                    className={`flex items-center rounded-md my-1 p-2 pl-3 w-full transition-colors ${
+                      isActive(href) 
+                        ? 'bg-slate-600 text-white' 
+                        : 'text-slate-200 hover:bg-slate-700 hover:text-white cursor-pointer'
                     }`}
                   >
-                    {React.cloneElement(icon, {
-                      className: `mr-1 ${isActive(href) ? 'text-white' : 'text-purple-800'}`,
-                    })}
-                    <span>{label}</span>
+                    <div className="flex items-center space-x-2">
+                      {React.cloneElement(icon, {
+                        className: `flex-shrink-0 ${isActive(href) ? 'text-white' : 'text-slate-300'}`,
+                      })}
+                      <span className="text-sm font-medium">{label}</span>
+                    </div>
                   </div>
                 </Link>
               )}
@@ -138,43 +136,47 @@ const Sidebar = ({ children }) => {
 
       {/* Mobile Sidebar */}
       <div 
-        className={`fixed top-0 left-0 h-full w-64 bg-white z-40 transform transition-transform duration-300 ease-in-out ${
+        className={`fixed top-0 left-0 h-full w-64 bg-slate-800 border-r border-slate-700 z-40 transform transition-transform duration-300 ease-in-out ${
           isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
         } md:hidden`}
       >
-        <div className='p-4 flex flex-col h-full'>
-          <div className='flex flex-col items-center mt-8'>
+        <div className='p-3 flex flex-col h-full'>
+          <div className='flex flex-col items-start mt-4 space-y-1'>
             {links.map(({ href, label, icon, submenu }, index) => (
               <div key={index} className="w-full">
                 {submenu ? (
                   <>
                     <div
                       onClick={() => setIsProdutosOpen(!isProdutosOpen)}
-                      className={`flex justify-between items-center rounded-lg my-1 p-3 w-full ${
+                      className={`flex justify-between items-center rounded-md my-1 p-2 pl-3 w-full cursor-pointer transition-colors ${
                         isActive(href) || submenu.some(item => isActive(item.href)) 
-                          ? 'bg-purple-800 text-white' 
-                          : 'bg-gray-100 hover:bg-gray-200 cursor-pointer'
+                          ? 'bg-slate-600 text-white' 
+                          : 'text-slate-200 hover:bg-slate-700 hover:text-white'
                       }`}
                     >
-                      <div className="flex items-center">
+                      <div className="flex items-center space-x-2">
                         {React.cloneElement(icon, {
-                          className: `mr-2 ${isActive(href) || submenu.some(item => isActive(item.href)) ? 'text-white' : 'text-purple-800'}`,
+                          className: `flex-shrink-0 ${(isActive(href) || submenu.some(item => isActive(item.href))) ? 'text-white' : 'text-slate-300'}`,
                         })}
-                        <span>{label}</span>
+                        <span className="text-sm font-medium">{label}</span>
                       </div>
-                      {isProdutosOpen || submenu.some(item => isActive(item.href)) ? <FiChevronDown /> : <FiChevronRight />}
+                      {isProdutosOpen || submenu.some(item => isActive(item.href)) ? (
+                        <FiChevronDown className="text-slate-400" size={16} />
+                      ) : (
+                        <FiChevronRight className="text-slate-400" size={16} />
+                      )}
                     </div>
                     
                     {(isProdutosOpen || submenu.some(item => isActive(item.href))) && (
-                      <div className="ml-4">
+                      <div className="ml-6">
                         {submenu.map((subItem, subIndex) => (
                           <Link key={subIndex} href={subItem.href}>
                             <div
                               onClick={() => setIsMobileMenuOpen(false)}
-                              className={`flex items-center rounded-lg my-1 p-2 pl-4 w-full ${
+                              className={`flex items-center rounded-md my-1 p-2 pl-3 w-full text-sm transition-colors ${
                                 isActive(subItem.href) 
-                                  ? 'bg-purple-600 text-white' 
-                                  : 'bg-gray-50 hover:bg-gray-100 cursor-pointer'
+                                  ? 'bg-slate-600 text-white' 
+                                  : 'text-slate-300 hover:bg-slate-700 hover:text-white cursor-pointer'
                               }`}
                             >
                               <span>{subItem.label}</span>
@@ -185,17 +187,21 @@ const Sidebar = ({ children }) => {
                     )}
                   </>
                 ) : (
-                  <Link href={href}>
+                  <Link href={href} className="w-full">
                     <div
                       onClick={() => setIsMobileMenuOpen(false)}
-                      className={`flex justify-center items-center rounded-lg my-2 p-3 w-full ${
-                        isActive(href) ? 'bg-purple-800 text-white' : 'bg-gray-100 hover:bg-gray-200 cursor-pointer'
+                      className={`flex items-center rounded-md my-1 p-2 pl-3 w-full transition-colors ${
+                        isActive(href) 
+                          ? 'bg-slate-600 text-white' 
+                          : 'text-slate-200 hover:bg-slate-700 hover:text-white cursor-pointer'
                       }`}
                     >
-                      {React.cloneElement(icon, {
-                        className: `mr-2 ${isActive(href) ? 'text-white' : 'text-purple-800'}`,
-                      })}
-                      <span>{label}</span>
+                      <div className="flex items-center space-x-2">
+                        {React.cloneElement(icon, {
+                          className: `flex-shrink-0 ${isActive(href) ? 'text-white' : 'text-slate-300'}`,
+                        })}
+                        <span className="text-sm font-medium">{label}</span>
+                      </div>
                     </div>
                   </Link>
                 )}
@@ -206,7 +212,9 @@ const Sidebar = ({ children }) => {
       </div>
 
       {/* Main Content */}
-      <main className='md:ml-20 w-full'>{children}</main>
+      <main className='md:ml-52 w-full transition-all duration-300 '>
+        {children}
+      </main>
     </div>
   );
 };

@@ -1,4 +1,3 @@
-// components/Modal.tsx
 import React from 'react';
 
 interface ModalProps {
@@ -13,14 +12,17 @@ export default function CreateModal({ isOpen, onClose, title, children }: ModalP
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
-        <div className="flex justify-between items-center border-b p-4">
-          <h3 className="text-xl font-semibold">{title}</h3>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+      <div className="bg-slate-800 rounded-lg shadow-xl w-full max-w-md border border-slate-700">
+        <div className="flex justify-between items-center border-b border-slate-700 p-4">
+          <h3 className="text-xl font-semibold text-slate-200">{title}</h3>
+          <button 
+            onClick={onClose} 
+            className="text-slate-400 hover:text-slate-200 transition-colors"
+          >
             &times;
           </button>
         </div>
-        <div className="p-4">
+        <div className="p-4 text-slate-300">
           {children}
         </div>
       </div>

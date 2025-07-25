@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react'
 import { setupAPIClient } from '../../services/api';
 import { AuthContext } from '../../contexts/AuthContext';
 import CreateModal from './CreateModal';
@@ -113,6 +113,7 @@ export default function PurchaseList({ refreshKey }: PurchaseListProps) {
         qtdCompra: 0,
         supplierId: '1'
       });
+      setActiveTab('pending')
       toast.success('Compra adicionada com sucesso!');
     } catch (error) {
       console.error('Erro ao adicionar compra:', error);
@@ -143,7 +144,7 @@ export default function PurchaseList({ refreshKey }: PurchaseListProps) {
   if (isLoading) {
     return (
       <div className="flex justify-center py-20">
-        <div className="w-8 h-8 border-4 border-green-500 border-t-transparent rounded-full animate-spin"></div>
+        <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
@@ -156,11 +157,11 @@ export default function PurchaseList({ refreshKey }: PurchaseListProps) {
             <input
               type="text"
               placeholder="Pesquisar compras..."
-              className="pl-10 pr-4 py-2 border rounded-lg w-64"
+              className="pl-10 pr-4 py-2 border border-slate-600 rounded-lg w-64 bg-slate-700 text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
-            <FaSearch className="absolute left-3 top-3 text-gray-400" />
+            <FaSearch className="absolute left-3 top-3 text-slate-400" />
           </div>
           
           <button
@@ -173,41 +174,41 @@ export default function PurchaseList({ refreshKey }: PurchaseListProps) {
       </div>
       
       {/* Tabs de filtro por status */}
-      <div className="flex border-b border-gray-200 mb-6">
+      <div className="flex border-b border-slate-700 mb-6">
         <button
           onClick={() => setActiveTab('all')}
           className={`px-4 py-2 font-medium text-sm focus:outline-none flex items-center gap-1 ${
             activeTab === 'all' 
-              ? 'border-b-2 border-blue-500 text-blue-600' 
-              : 'text-gray-500 hover:text-gray-700'
+              ? 'border-b-2 border-blue-500 text-blue-400' 
+              : 'text-slate-400 hover:text-slate-300'
           }`}
         >
-          Todas <span className="text-xs bg-gray-100 px-2 py-1 rounded-full">{counts.all}</span>
+          Todas <span className="text-xs bg-slate-700 px-2 py-1 rounded-full">{counts.all}</span>
         </button>
         <button
           onClick={() => setActiveTab('pending')}
           className={`px-4 py-2 font-medium text-sm focus:outline-none flex items-center gap-1 ${
             activeTab === 'pending' 
-              ? 'border-b-2 border-blue-500 text-blue-600' 
-              : 'text-gray-500 hover:text-gray-700'
+              ? 'border-b-2 border-blue-500 text-blue-400' 
+              : 'text-slate-400 hover:text-slate-300'
           }`}
         >
-          Pendentes <span className="text-xs bg-gray-100 px-2 py-1 rounded-full">{counts.pending}</span>
+          Pendentes <span className="text-xs bg-slate-700 px-2 py-1 rounded-full">{counts.pending}</span>
         </button>
         <button
           onClick={() => setActiveTab('completed')}
           className={`px-4 py-2 font-medium text-sm focus:outline-none flex items-center gap-1 ${
             activeTab === 'completed' 
-              ? 'border-b-2 border-blue-500 text-blue-600' 
-              : 'text-gray-500 hover:text-gray-700'
+              ? 'border-b-2 border-blue-500 text-blue-400' 
+              : 'text-slate-400 hover:text-slate-300'
           }`}
         >
-          Concluídas <span className="text-xs bg-gray-100 px-2 py-1 rounded-full">{counts.completed}</span>
+          Concluídas <span className="text-xs bg-slate-700 px-2 py-1 rounded-full">{counts.completed}</span>
         </button>
       </div>
       
       {filteredPurchases.length === 0 ? (
-        <div className="bg-gray-100 p-8 rounded-lg text-center">
+        <div className="bg-slate-700 p-8 rounded-lg text-center text-slate-300">
           {searchTerm 
             ? "Nenhuma compra encontrada com esse termo" 
             : activeTab === 'all'
@@ -218,44 +219,44 @@ export default function PurchaseList({ refreshKey }: PurchaseListProps) {
         </div>
       ) : (
         <>
-          <div className="overflow-x-auto bg-white rounded-lg shadow">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+          <div className="overflow-x-auto bg-slate-800 rounded-lg shadow border border-slate-700">
+            <table className="min-w-full divide-y divide-slate-700">
+              <thead className="bg-slate-700">
                 <tr>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
                     Nome
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
                     Descrição
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
                     Data
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
                     Status
                   </th>
-                  <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-slate-300 uppercase tracking-wider">
                     Ações
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-slate-800 divide-y divide-slate-700">
                 {currentItems.map((purchase) => (
-                  <tr key={purchase.id}>
+                  <tr key={purchase.id} className="hover:bg-slate-700/50">
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">{purchase.name}</div>
+                      <div className="text-sm font-medium text-slate-200">{purchase.name}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-500">{purchase.description}</div>
+                      <div className="text-sm text-slate-400">{purchase.description}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-500">
+                      <div className="text-sm text-slate-400">
                         {new Date(purchase.created_at).toLocaleDateString('pt-BR')}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                        ${purchase.status ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                        ${purchase.status ? 'bg-green-900/50 text-green-300' : 'bg-yellow-900/50 text-yellow-300'}`}>
                         {purchase.status ? 'Concluída' : 'Pendente'}
                       </span>
                     </td>
@@ -267,7 +268,7 @@ export default function PurchaseList({ refreshKey }: PurchaseListProps) {
                             setShowProductModal(true);
                           }}
                           className={`inline-flex items-center px-3 py-1 rounded-md text-sm 
-                            ${purchase.status ? 'bg-blue-100 text-blue-800 hover:bg-blue-200' : 'bg-green-100 text-green-800 hover:bg-green-200'}`}
+                            ${purchase.status ? 'bg-blue-900/50 text-blue-300 hover:bg-blue-800/50' : 'bg-green-900/50 text-green-300 hover:bg-green-800/50'}`}
                         >
                           {purchase.status ? <FaList className="mr-1" /> : <FaPlus className="mr-1" />}
                           {purchase.status ? 'Ver Itens' : 'Adicionar Itens'}
@@ -298,7 +299,7 @@ export default function PurchaseList({ refreshKey }: PurchaseListProps) {
                     className={`px-3 py-1 rounded-md ${
                       currentPage === number 
                         ? 'bg-blue-600 text-white' 
-                        : 'bg-gray-200 hover:bg-gray-300'
+                        : 'bg-slate-700 hover:bg-slate-600 text-slate-300'
                     }`}
                   >
                     {number}
@@ -318,23 +319,23 @@ export default function PurchaseList({ refreshKey }: PurchaseListProps) {
       >
         <div className="space-y-4">
           <div>
-            <label className="block mb-1 font-medium">Nome*</label>
+            <label className="block mb-1 font-medium text-slate-300">Nome*</label>
             <input
               type="text"
               value={formData.name}
               onChange={(e) => setFormData({...formData, name: e.target.value})}
-              className="w-full px-3 py-2 border rounded"
+              className="w-full px-3 py-2 border border-slate-600 rounded bg-slate-700 text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="Ex: Compra para Funge"
               required
             />
           </div>
           
           <div>
-            <label className="block mb-1 font-medium">Descrição</label>
+            <label className="block mb-1 font-medium text-slate-300">Descrição</label>
             <textarea
               value={formData.description}
               onChange={(e) => setFormData({...formData, description: e.target.value})}
-              className="w-full px-3 py-2 border rounded"
+              className="w-full px-3 py-2 border border-slate-600 rounded bg-slate-700 text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="Ex: Ingredientes para o funge"
               rows={3}
             />
@@ -343,7 +344,7 @@ export default function PurchaseList({ refreshKey }: PurchaseListProps) {
           <div className="flex justify-end gap-3 pt-4">
             <button
               onClick={() => setShowAddModal(false)}
-              className="px-4 py-2 border rounded hover:bg-gray-100"
+              className="px-4 py-2 border border-slate-600 rounded hover:bg-slate-700 text-slate-300"
             >
               Cancelar
             </button>
@@ -367,8 +368,6 @@ export default function PurchaseList({ refreshKey }: PurchaseListProps) {
           status={selectedPurchase.status}
         />
       )}
-      
-      
     </div>
   );
 }
