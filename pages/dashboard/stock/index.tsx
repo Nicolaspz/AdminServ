@@ -4,6 +4,7 @@ import { AuthContext } from "../../../contexts/AuthContext";
 import { FiEye, FiChevronDown, FiChevronUp, FiSearch, FiX, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import Sidebar from "../../../components/Sidebar";
 import Header from "../../../components/Header";
+import Head from "next/head";
 
 type Product = {
   id: string;
@@ -83,11 +84,15 @@ export default function Stock() {
   };
 
   return (
-    <Sidebar>
-      <Header />
+    <>
+     <Head>
+            <title>ServeFixe - Stock</title>
+      </Head>
+      <Sidebar>
+      <Header title="Stock" />
       <div className="container mx-auto px-4 py-6 max-w-7xl">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-          <h1 className="text-2xl font-bold text-slate-200">Gestão de Estoque</h1>
+          
           <div className="relative w-full md:w-64">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <FiSearch className="text-slate-400" />
@@ -303,5 +308,7 @@ export default function Stock() {
         )}
       </div>
     </Sidebar>
+    </>
+    
   );
 }

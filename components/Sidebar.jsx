@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { FiSettings, FiCoffee, FiMenu, FiChevronDown, FiChevronRight, FiHome, FiBox, FiPackage } from 'react-icons/fi';
+import { FiSettings, FiCoffee, FiMenu, FiChevronDown, FiChevronRight } from 'react-icons/fi';
 import { RxDashboard, RxPerson } from 'react-icons/rx';
 import { HiOutlineShoppingBag, HiOutlineClipboardList } from 'react-icons/hi';
+import { GiForkKnifeSpoon, GiCook, GiTable } from 'react-icons/gi';
+import { FaUserFriends, FaBeer, FaShoppingCart } from 'react-icons/fa';
+import { BiRestaurant } from 'react-icons/bi';
+import { MdDashboard, MdInventory2 } from 'react-icons/md';
 import { useRouter } from 'next/router';
 
 const Sidebar = ({ children }) => {
@@ -11,24 +15,26 @@ const Sidebar = ({ children }) => {
   const [isProdutosOpen, setIsProdutosOpen] = useState(false);
   
   const links = [
-    { href: '/dashboard', label: 'Dashboard', icon: <FiHome size={18} /> },
-    { 
-      href: '', 
-      label: 'Produtos', 
-      icon: <FiBox size={18} />,
-      submenu: [
-        { href: '/dashboard/igredient', label: 'Ingrediente' },
-        { href: '/dashboard/produt', label: 'Produto' }
-      ]
-    },
-    { href: '/dashboard/stock', label: 'Stock', icon: <FiPackage size={18} /> },
-    { href: '/dashboard/sales', label: 'Compra', icon: <HiOutlineShoppingBag size={18} /> },
-    { href: '/dashboard/recipe', label: 'Receitas', icon: <HiOutlineClipboardList size={18} /> },
-    { href: '/dashboard/user', label: 'Usuários', icon: <RxPerson size={18} /> },
-    { href: '/dashboard/organization', label: 'Definições', icon: <FiSettings size={18} /> },
-    { href: 'dashboard/cardapio', label: 'Cardápio', icon: <FiSettings size={18} /> },
-    { href: '/dashboard/pedidos', label: 'Pedidos', icon: <FiSettings size={18} /> }, 
-    { href: 'dashboard/comida_pedido', label: 'Pedidos Comida', icon: <FiSettings size={18} /> }
+    { href: '/dashboard', label: 'Dashboard', icon: <MdDashboard size={18} /> },
+{ 
+  href: '', 
+  label: 'Produtos', 
+  icon: <GiForkKnifeSpoon size={18} />,
+  submenu: [
+    { href: '/dashboard/igredient', label: 'Ingrediente' },
+    { href: '/dashboard/produt', label: 'Produto' }
+  ]
+},
+{ href: '/dashboard/stock', label: 'Stock', icon: <MdInventory2 size={18} /> },
+{ href: '/dashboard/sales', label: 'Compra', icon: <FaShoppingCart size={18} /> },
+{ href: '/dashboard/user', label: 'Usuários', icon: <FaUserFriends size={18} /> },
+{ href: '/dashboard/cardapio', label: 'Cardápio', icon: <BiRestaurant size={18} /> },
+{ href: '/dashboard/pedidos', label: 'Pedidos Bar', icon: <FaBeer size={18} /> },
+{ href: '/dashboard/comida_pedido', label: 'Pedido Cozinha', icon: <GiCook size={18} /> },
+{ href: '/dashboard/mesa', label: 'Mesas Abertas', icon: <GiTable size={18} /> },
+{ href: '/dashboard/organization', label: 'Definições', icon: <FiSettings size={18} /> },
+
+
   ];
 
   useEffect(() => {

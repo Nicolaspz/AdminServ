@@ -10,6 +10,7 @@ import Modal from "../../../components/Modal";
 import RecipeModal from "../../../components/recipe/RecipeModal";
 import { FaMoneyBillWave, FaCheck } from 'react-icons/fa';
 import { Tooltip } from 'react-tooltip';
+import Head from "next/head";
 
 type Category = {
   id: string;
@@ -531,8 +532,12 @@ export default function ProductsList() {
   };
 
   return (
+    <>
+      <Head>
+            <title>ServeFixe - Produtos</title>
+      </Head>
     <Sidebar>
-      <Header />
+      <Header title="Produtos" />
       <div className="container mx-auto px-4 py-8 max-w-7xl">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
           <h1 className="text-2xl font-bold text-slate-200">Lista de Produtos</h1>
@@ -769,6 +774,7 @@ export default function ProductsList() {
           theme="dark"
         />
       </div>
-    </Sidebar>
+      </Sidebar>
+    </>
   );
 }

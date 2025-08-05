@@ -2,7 +2,7 @@ import React, { useContext, useState } from 'react';
 import { AuthContext } from '../contexts/AuthContext';
 import { FiLogOut, FiUser, FiChevronDown } from 'react-icons/fi';
 
-const Header = () => {
+const Header = ({title}) => {
   const { user, signOut } = useContext(AuthContext);
   const [isLogoutVisible, setIsLogoutVisible] = useState(false);
 
@@ -12,7 +12,7 @@ const Header = () => {
 
   return (
     <div className='flex justify-between items-center px-6 py-4 bg-slate-800 border-b border-slate-700 text-slate-100'>
-      <h2 className='text-lg font-semibold text-slate-200'>Dashboard</h2>
+      <h2 className='text-lg font-semibold text-slate-200'>{title}</h2>
       
       <div className="relative">
         {user && (

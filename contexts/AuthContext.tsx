@@ -1,3 +1,4 @@
+
 import { createContext, ReactNode, useState, useEffect } from "react";
 import {destroyCookie,setCookie,parseCookies} from 'nookies'
 import {toast} from 'react-toastify'
@@ -151,9 +152,8 @@ export function AuthProvider({ children }: AuthProviderProps){
       //console.log("logado",response)
       toast.success("Logado com sucesso!");
       //console.log("Response-> ",response.data)
-      const { id, name, email, user_name, token, role, organizationId } = response.data;
-      const { address,imageLogo,nif,activeLicense} = response.data.Organization;
-          
+      const { id, name, email, role, organizationId, user_name,token } = response.data;
+          const orgData = response.data.Organization || {};
           const dados = response.data.Organization;
       //console.log("aqui", {token});
       setCookie(undefined, '@sujeitopizza.token', token, {
@@ -162,18 +162,20 @@ export function AuthProvider({ children }: AuthProviderProps){
       })
 
       setUser({
-        id,
-        name,
-        role,
-        token,
-        user_name,
-        organizationId, address,
-        imageLogo,
-        nif,
-        activeLicense,
-        name_org:dados.name,
-      })
-      //console.log("usuario logado", user);
+            id,
+            name,
+            email,
+            role,
+            user_name,
+            token, // Garanta que o token está sendo setado
+            organizationId,
+            address: orgData.address || null,
+            imageLogo: orgData.imageLogo || null,
+            nif: orgData.nif || null,
+            activeLicense: orgData.activeLicense || null,
+            name_org: orgData.name || ''
+          });
+      console.log("usuario logado", user);
       //Passar para proximas requisiçoes o nosso token
       api.defaults.headers['Authorization'] = `Bearer ${token}`
       

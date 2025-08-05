@@ -1,6 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import { FiTrendingUp, FiDollarSign, FiUsers, FiCoffee, FiClock, FiPieChart } from "react-icons/fi";
-import { Bar, Pie, Line } from "react-chartjs-2";
+import { FiDollarSign, FiCoffee, FiUsers, FiClock } from "react-icons/fi";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -23,8 +22,8 @@ import { LineChart } from "../../components/dasboard/LineChart";
 import { PieChart } from "../../components/dasboard/PieChart";
 import { RecentOrdersTable } from "../../components/dasboard/RecentOrdersTable";
 import { PopularItems } from "../../components/dasboard/PopularItems";
+import Head from "next/head";
 
-// Registrando componentes do Chart.js
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -38,92 +37,113 @@ ChartJS.register(
 );
 
 export default function Dashboard() {
-  const { user } = useContext(AuthContext);
+  const { user, isAuthenticated } = useContext(AuthContext);
   const [report, setReport] = useState<any>(null);
-  const [startDate, setStartDate] = useState(dayjs().format("YYYY-MM-DD"));
-  const [endDate, setEndDate] = useState(dayjs().format("YYYY-MM-DD"));
   const [timeRange, setTimeRange] = useState<string>("today");
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
   const apiClient = setupAPIClient();
 
-  // Dados mockados para exemplo (substitua pela sua API real)
-  /*const mockData = {
-    totalRevenue: 15231.89,
-    revenueChange: 2.01,
-    totalOrders: 2350,
-    ordersChange: 18.01,
-    averageTicket: 85.50,
-    averageTicketChange: 0.15,
-    pendingOrders: 12,
-    completedOrders: 234,
-    popularItems: [
-      { name: "Pizza Margherita", sales: 320 },
-      { name: "Hambúrguer Artesanal", sales: 280 },
-      { name: "Salada Caesar", sales: 190 },
-      { name: "Sushi Variado", sales: 175 },
-      { name: "Sobremesa do Chef", sales: 150 }
-    ],
-    hourlySales: {
-      labels: ["10h", "12h", "14h", "16h", "18h", "20h", "22h"],
-      data: [1200, 4500, 2200, 1800, 6500, 4800, 2100]
-    },
-    paymentMethods: {
-      labels: ["Cartão", "Dinheiro", "PIX", "Outros"],
-      data: [65, 20, 10, 5]
+  // Função para calcular o range de datas
+  const getDateRange = (range: string) => {
+    const today = dayjs();
+    switch (range) {
+      case "today":
+        return {
+          startDate: today.format("YYYY-MM-DD"),
+          endDate: today.format("YYYY-MM-DD")
+        };
+      case "week":
+        return {
+          startDate: today.startOf('week').format("YYYY-MM-DD"),
+          endDate: today.endOf('week').format("YYYY-MM-DD")
+        };
+      case "month":
+        return {
+          startDate: today.startOf('month').format("YYYY-MM-DD"),
+          endDate: today.endOf('month').format("YYYY-MM-DD")
+        };
+      default:
+        return {
+          startDate: today.format("YYYY-MM-DD"),
+          endDate: today.format("YYYY-MM-DD")
+        };
     }
-  };*/
+  };
+
+  const [dateRange, setDateRange] = useState(getDateRange(timeRange));
 
   const fetchDashboard = async () => {
-  if (!user?.organizationId || !user?.token) return;
+    if (!user?.organizationId || !user?.token) {
+      setIsLoading(false);
+      return;
+    }
 
-  try {
-    const res = await apiClient.get(
-      `/dash/${user.organizationId}`, // agora o ID vai na rota
-      {
-        params: {
-          startDate,
-          endDate,
-        },
-        headers: {
-          Authorization: `Bearer ${user.token}`,
-        },
-      }
-    );
+    setIsLoading(true);
+    setHasError(false);
+    
+    try {
+      const res = await apiClient.get(
+        `/dash/${user.organizationId}`,
+        {
+          params: {
+            startDate: dateRange.startDate,
+            endDate: dateRange.endDate,
+          },
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+          },
+        }
+      );
 
-    setReport(res.data);
-    console.log("Dados retornados",res.data)
-  } catch (error) {
-    console.error("Erro ao buscar dashboard:", error);
-  }
-};
-useEffect(() => {
-    const today = dayjs().format("YYYY-MM-DD");
-    setStartDate(today);
-    setEndDate(today);
-  }, []);
+      setReport(res.data);
+    } catch (error) {
+      console.error("Erro ao buscar dashboard:", error);
+      setHasError(true);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
+  // Atualiza o dateRange quando timeRange muda
   useEffect(() => {
-    if (user) {
+    setDateRange(getDateRange(timeRange));
+  }, [timeRange]);
+
+  // Monitora mudanças na autenticação e no dateRange
+  useEffect(() => {
+    if (isAuthenticated && user) {
       fetchDashboard();
     }
-  }, [user, timeRange]);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    fetchDashboard();
-  };
+  }, [isAuthenticated, user, dateRange]);
 
   const handleTimeRangeChange = (range: string) => {
     setTimeRange(range);
-    // Aqui você pode ajustar as datas conforme o intervalo selecionado
   };
 
+  // Se não estiver autenticado, mostra loading
+  if (!isAuthenticated) {
+    return (
+      <Sidebar>
+        <Header title="Dashboard" />
+        <div className="flex justify-center items-center min-h-screen">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        </div>
+      </Sidebar>
+    );
+  }
+
   return (
-    <Sidebar>
-      <Header />
+    <>
+      <Head>
+        <title>ServeFixe - Dashboard</title>
+      </Head>
+       <Sidebar>
+      <Header title="Dashboard" />
       <div className="bg-slate-50 min-h-screen">
         <div className="container mx-auto px-4 py-6 max-w-7xl">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
-            <h1 className="text-2xl font-bold text-slate-800">Visão Geral do Restaurante</h1>
+            
             
             <div className="flex space-x-2 mt-4 md:mt-0">
               <button
@@ -147,45 +167,22 @@ useEffect(() => {
             </div>
           </div>
 
-          <form
-            onSubmit={handleSubmit}
-            className="flex flex-wrap gap-4 mb-8 items-end bg-white p-4 rounded-lg shadow-sm"
-          >
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
-                Data Inicial
-              </label>
-              <input
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                className="border border-slate-300 rounded-md p-2 text-slate-700 focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
-              />
+          {isLoading ? (
+            <div className="flex justify-center items-center min-h-[300px]">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
             </div>
-
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
-                Data Final
-              </label>
-              <input
-                type="date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                className="border border-slate-300 rounded-md p-2 text-slate-700 focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
-              />
+          ) : hasError ? (
+            <div className="flex flex-col items-center justify-center min-h-[300px]">
+              <p className="text-slate-500 mb-4">Erro ao carregar os dados do dashboard</p>
+              <button
+                onClick={fetchDashboard}
+                className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+              >
+                Tentar novamente
+              </button>
             </div>
-
-            <button
-              type="submit"
-              className="bg-slate-800 text-white px-4 py-2 rounded-md hover:bg-slate-700 transition-colors"
-            >
-              Filtrar
-            </button>
-          </form>
-
-          {report ? (
+          ) : report ? (
             <div className="space-y-6">
-              {/* Cards de Métricas Principais */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 <MetricCard
                   title="Faturamento Total"
@@ -217,23 +214,15 @@ useEffect(() => {
                 />
               </div>
 
-              {/* Gráficos e Seções Adicionais */}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-2 bg-white p-6 rounded-lg shadow-sm">
                   <div className="flex justify-between items-center mb-4">
                     <h2 className="text-lg font-semibold text-slate-800">Vendas por Hora</h2>
-                    <select className="border border-slate-300 rounded-md px-3 py-1 text-sm text-slate-700">
-                      <option>Hoje</option>
-                      <option>Ontem</option>
-                      <option>Esta Semana</option>
-                    </select>
                   </div>
-                  
-                    <div className="h-80">
-                      <LineChart data={report.charts.hourlySales} />
-                    </div>
-                  
-                </div> 
+                  <div className="h-80">
+                    <LineChart data={report.charts.hourlySales} />
+                  </div>
+                </div>
 
                 <div className="bg-white p-6 rounded-lg shadow-sm">
                   <h2 className="text-lg font-semibold text-slate-800 mb-4">Métodos de Pagamento</h2>
@@ -252,19 +241,26 @@ useEffect(() => {
                 <div className="lg:col-span-2 bg-white p-6 rounded-lg shadow-sm">
                   <div className="flex justify-between items-center mb-4">
                     <h2 className="text-lg font-semibold text-slate-800">Pedidos Recentes</h2>
-                    <button className="text-sm text-blue-600 hover:text-blue-800">
-                      Ver Todos
-                    </button>
                   </div>
                   <RecentOrdersTable orders={report.recentOrders} />
                 </div>
               </div>
             </div>
           ) : (
-            <p className="text-slate-500">Carregando dados do dashboard...</p>
+            <div className="flex flex-col items-center justify-center min-h-[300px]">
+              <p className="text-slate-500 mb-4">Nenhum dado disponível</p>
+              <button
+                onClick={fetchDashboard}
+                className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+              >
+                Carregar dados
+              </button>
+            </div>
           )}
         </div>
       </div>
     </Sidebar>
+    </>
+   
   );
 }

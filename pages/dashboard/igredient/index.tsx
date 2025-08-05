@@ -7,6 +7,7 @@ import Header from "../../../components/Header";
 import { API_BASE_URL } from '../../../config';
 import { toast } from 'react-toastify';
 import Modal from "../../../components/Modal";
+import Head from "next/head";
 
 type Category = {
   id: string;
@@ -483,8 +484,12 @@ export default function IngredientsList() {
   };
 
   return (
+    <>
+      <Head>
+            <title>ServeFixe - Igrediente</title>
+      </Head>
     <Sidebar>
-      <Header />
+      <Header title="Igrediente" />
       <div className="container mx-auto px-4 py-6 max-w-7xl">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
           <h1 className="text-2xl font-bold text-slate-200">Lista de Ingredientes</h1>
@@ -658,5 +663,6 @@ export default function IngredientsList() {
         </Modal>
       </div>
     </Sidebar>
+    </>
   );
 }

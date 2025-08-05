@@ -3,6 +3,7 @@ import { AuthContext } from '../../../contexts/AuthContext';
 import OrganizationProfileForm from '../../../components/Organizations/OrganizationProfileForm';
 import Sidebar from '../../../components/Sidebar';
 import Header from '../../../components/Header';
+import Head from 'next/head';
 
 interface Organization {
   id: string;
@@ -77,8 +78,12 @@ function DashboardPage() {
   }
 
   return (
+    <>
+      <Head>
+            <title>ServeFixe - Definições</title>
+      </Head>
     <Sidebar>
-      <Header />
+      <Header title="Definições" />
     <div className="container mx-auto mr-1.2 px-4 py-8 max-w-6xl">
       <OrganizationProfileForm 
         organization={organization} 
@@ -86,6 +91,7 @@ function DashboardPage() {
       />
       </div>
       </Sidebar>
+    </>
   );
 }
 

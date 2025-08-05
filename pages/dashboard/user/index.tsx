@@ -180,20 +180,17 @@ export default function UserManagement() {
   return (
     <>
       <Head>
-        <title>Gerenciamento de Usuários - Serve Fixe</title>
+        <title>Serve Fixe - Usuários</title>
       </Head>
       
       <Sidebar>
-        <Header />
+        <Header title="Usuários" />
         
         <div className="container mx-auto px-4 py-8 max-w-7xl">
           <ToastContainer position="top-right" autoClose={5000} theme="dark" />
           
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
-            <h1 className="text-2xl font-bold text-slate-200">
-              <FiUser className="inline mr-2" />
-              Gerenciamento de Usuários
-            </h1>
+            
             
             <div className="flex gap-4 mt-4 md:mt-0">
               <div className="relative w-full md:w-64">

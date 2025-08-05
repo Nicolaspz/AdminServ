@@ -1,10 +1,11 @@
 import React, { useEffect, useState, useContext } from "react";
-import { setupAPIClient } from "../../services/api";
-import { AuthContext } from "../../contexts/AuthContext";
-import Sidebar from "../../components/Sidebar";
-import Header from "../../components/Header";
+import { setupAPIClient } from "../../../services/api";
+import { AuthContext } from "../../../contexts/AuthContext";
+import Sidebar from "../../../components/Sidebar";
+import Header from "../../../components/Header";
 import { toast } from "react-toastify";
 import { FaEye, FaCheck, FaCheckCircle, FaRegCircle  } from "react-icons/fa";
+import Head from "next/head";
 
 
 interface OrderItem {
@@ -130,13 +131,14 @@ export default function OrdersPage() {
   }, [user]);
 
   return (
-    <Sidebar>
-      <Header /> 
+    <>
+      <Head>
+            <title>ServeFixe - Cozinha</title>
+      </Head>
+      <Header title="Pedidos da Cozinha" /> 
       
       <div className="container mx-auto px-4 py-8 max-w-6xl">
-        <h1 className="text-2xl font-bold mb-6">
-          Pedidos de {CATEGORY_FILTER.toUpperCase()}
-        </h1>
+        
         {loading ? (
           <div className="text-center py-10">Carregando...</div>
         ) : filteredOrders.length === 0 ? (
@@ -208,6 +210,6 @@ export default function OrdersPage() {
           </div>
         )}
       </div>
-    </Sidebar>
+    </>
   );
 }

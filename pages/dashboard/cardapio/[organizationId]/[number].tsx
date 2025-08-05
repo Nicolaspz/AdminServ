@@ -6,6 +6,7 @@ import { setupAPIClient } from '../../../../services/api';
 import { AuthContext } from '../../../../contexts/AuthContext';
 import { toast, ToastContainer } from 'react-toastify';
 import { useRouter } from 'next/router';
+import Head from 'next/head';
 
 type Product = {
   id: string;
@@ -190,6 +191,10 @@ const ProductMenu = () => {
   };
 
   return (
+    <>
+      <Head>
+            <title>ServeFixe - Menu</title>
+      </Head>
     <div className="bg-gray-50 min-h-screen pb-20">
       <ToastContainer position="top-right" autoClose={3000} />
       
@@ -422,7 +427,8 @@ const ProductMenu = () => {
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+      </div>
+    </>
   );
 };
 
